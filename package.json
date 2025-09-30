@@ -1,23 +1,23 @@
 {
-"name": "podologia-martita",
-"version": "1.0.0",
-"private": true,
-"scripts": {
-"dev": "vite",
-"build": "vite build",
-"preview": "vite preview"
-},
-"dependencies": {
-"@supabase/supabase-js": "^2.39.1",
-"react": "^18.2.0",
-"react-dom": "^18.2.0"
-},
-"devDependencies": {
-"@vitejs/plugin-react": "^4.2.0",
-"vite": "^5.1.0"
-},
-"engines": {
-"node": ">=18"
+  "name": "podologia-martita",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview"
+  },
+  "dependencies": {
+    "@supabase/supabase-js": "^2.39.1",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0",
+    "react-icons": "^4.11.0"
+  },
+  "devDependencies": {
+    "@vitejs/plugin-react": "^4.2.0",
+    "vite": "^5.1.0"
+  },
+  "engines": {
+    "node": ">=18"
+  }
 }
-}
-

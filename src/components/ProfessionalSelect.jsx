@@ -8,16 +8,18 @@ export default function ProfessionalSelect({ onSelect }) {
 
   useEffect(() => {
     const fetchProfessionals = async () => {
+      setLoading(true);
       const { data, error } = await supabase
         .from("professionals")
         .select("id, name")
-        .order("name"); // 👈 sin schema()
+        .order("name");
 
       if (error) {
         console.error("Error cargando profesionales:", error.message);
-        setErrorMsg(error.message);
+        setErrorMsg("Error al cargar profesionales: " + error.message);
       } else {
-        setProfessionals(data);
+        setProfessionals(data || []);
+        setErrorMsg("");
       }
       setLoading(false);
     };
@@ -26,7 +28,7 @@ export default function ProfessionalSelect({ onSelect }) {
   }, []);
 
   if (loading) return <p>Cargando profesionales...</p>;
-  if (errorMsg) return <p style={{ color: "red" }}>Error: {errorMsg}</p>;
+  if (errorMsg) return <p style={{ color: "red" }}>{errorMsg}</p>;
   if (professionals.length === 0) return <p>No hay profesionales registrados.</p>;
 
   return (

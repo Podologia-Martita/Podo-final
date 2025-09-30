@@ -1,3 +1,4 @@
+// src/components/ServiceSelect.jsx
 import { useEffect, useState } from 'react';
 import { supabase } from '../lib/supabaseClient';
 
@@ -10,9 +11,10 @@ export default function ServiceSelect({ professionalId, onSelect }) {
     if (!professionalId) return;
 
     const fetchServices = async () => {
+      setLoading(true);
       const { data, error } = await supabase
         .from('services')
-        .select('name, price, duration_minutes')
+        .select('id, name, price, duration_minutes')
         .eq('professional_id', professionalId)
         .order('name')
         .schema('public');
@@ -28,6 +30,7 @@ export default function ServiceSelect({ professionalId, onSelect }) {
     fetchServices();
   }, [professionalId]);
 
+  if (!professionalId) return null;
   if (loading) return <p>Cargando servicios...</p>;
   if (errorMsg) return <p>{errorMsg}</p>;
   if (services.length === 0) return <p>No hay servicios disponibles.</p>;
@@ -36,10 +39,4 @@ export default function ServiceSelect({ professionalId, onSelect }) {
     <select onChange={e => onSelect(e.target.value)}>
       <option value="">-- Selecciona servicio --</option>
       {services.map(s => (
-        <option key={s.name} value={s.name}>
-          {s.name} (${s.price} – {s.duration_minutes} min)
-        </option>
-      ))}
-    </select>
-  );
-}
+        <option key={s.id} value={s.name

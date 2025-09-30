@@ -1,72 +1,79 @@
 // src/components/TimeSelect.jsx
-import { useEffect, useState } from "react";
+import { useState, useEffect } from "react";
 import { supabase } from "../lib/supabaseClient";
+import { generateAvailableHours } from "../utils/hours";
 
-export default function TimeSelect({ professionalId, date, onSelect }) {
-  const [bookedTimes, setBookedTimes] = useState([]);
+export default function TimeSelect({ professionalId, selectedDate, onSelect }) {
+  const [availableHours, setAvailableHours] = useState([]);
   const [loading, setLoading] = useState(false);
   const [errorMsg, setErrorMsg] = useState("");
-
-  // ✅ Generar horarios de 10:00 a 18:00
-  const generateTimeSlots = (startHour = 10, endHour = 18) => {
-    const slots = [];
-    for (let h = startHour; h <= endHour; h++) {
-      slots.push(`${h.toString().padStart(2, "0")}:00`);
-    }
-    return slots;
-  };
-
-  const timeSlots = generateTimeSlots();
+  const [selectedHour, setSelectedHour] = useState("");
 
   useEffect(() => {
-    if (!professionalId || !date) {
-      setBookedTimes([]);
+    if (!professionalId || !selectedDate) {
+      setAvailableHours([]);
       return;
     }
 
-    const fetchBookedTimes = async () => {
+    const fetchBookedHours = async () => {
       setLoading(true);
-      const { data, error } = await supabase
-        .from("appointments")
-        .select("time")
-        .eq("professional_id", professionalId)
-        .eq("date", date);
+      setErrorMsg("");
 
-      if (error) {
-        console.error("Error al cargar horas:", error.message);
-        setErrorMsg("Error al cargar horas: " + error.message);
-        setBookedTimes([]);
-      } else {
-        setBookedTimes(data.map((a) => a.time));
-        setErrorMsg("");
+      try {
+        const { data, error } = await supabase
+          .from("appointments")
+          .select("time")
+          .eq("professional_id", professionalId)
+          .eq("date", selectedDate);
+
+        if (error) throw error;
+
+        const bookedHours = data.map((appt) => appt.time);
+
+        // Generar todas las horas de 10:00 a 18:00
+        const allHours = generateAvailableHours("10:00", "18:00", 60);
+
+        // Filtrar las horas ocupadas
+        const freeHours = allHours.filter((hour) => !bookedHours.includes(hour));
+
+        setAvailableHours(freeHours);
+        setSelectedHour("");
+      } catch (err) {
+        setErrorMsg("Error al cargar horas: " + err.message);
+        setAvailableHours([]);
+      } finally {
+        setLoading(false);
       }
-      setLoading(false);
     };
 
-    fetchBookedTimes();
-  }, [professionalId, date]);
+    fetchBookedHours();
+  }, [professionalId, selectedDate]);
 
-  if (!professionalId || !date) return null;
+  const handleSelect = (hour) => {
+    setSelectedHour(hour);
+    onSelect(hour);
+  };
+
+  if (!professionalId || !selectedDate) return null;
   if (loading) return <p>Cargando horas...</p>;
   if (errorMsg) return <p style={{ color: "red" }}>{errorMsg}</p>;
+  if (availableHours.length === 0) return <p>No hay horas disponibles.</p>;
 
   return (
     <div style={{ display: "flex", flexWrap: "wrap", gap: "8px", marginTop: "8px" }}>
-      {timeSlots.map((slot) => (
+      {availableHours.map((hour) => (
         <button
-          key={slot}
-          onClick={() => onSelect(slot)}
-          disabled={bookedTimes.includes(slot)}
+          key={hour}
+          onClick={() => handleSelect(hour)}
           style={{
-            padding: "8px 12px",
+            padding: "6px 12px",
             borderRadius: "6px",
-            border: "1px solid #ccc",
-            backgroundColor: bookedTimes.includes(slot) ? "#eee" : "#fff",
-            cursor: bookedTimes.includes(slot) ? "not-allowed" : "pointer",
-            minWidth: "70px",
+            border: selectedHour === hour ? "2px solid #0070f3" : "1px solid #ccc",
+            backgroundColor: selectedHour === hour ? "#e0f0ff" : "#fff",
+            cursor: "pointer",
           }}
         >
-          {slot}
+          {hour}
         </button>
       ))}
     </div>

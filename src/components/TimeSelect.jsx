@@ -1,4 +1,3 @@
-// src/components/TimeSelect.jsx
 import { useState, useEffect } from "react";
 import { supabase } from "../lib/supabaseClient";
 import { generateAvailableHours } from "../utils/hours";
@@ -23,14 +22,14 @@ export default function TimeSelect({ professionalId, selectedDate, onSelect }) {
         const { data, error } = await supabase
           .from("appointments")
           .select("time")
-          .eq("professional_id", professionalId.id)
+          .eq("professional_id", professionalId)
           .eq("date", selectedDate);
 
         if (error) throw error;
 
-        const bookedHours = data.map((appt) => appt.time);
+        const bookedHours = data.map(appt => appt.time);
         const allHours = generateAvailableHours("10:00", "18:00", 60);
-        const freeHours = allHours.filter((hour) => !bookedHours.includes(hour));
+        const freeHours = allHours.filter(hour => !bookedHours.includes(hour));
 
         setAvailableHours(freeHours);
         setSelectedHour("");
@@ -47,7 +46,7 @@ export default function TimeSelect({ professionalId, selectedDate, onSelect }) {
 
   const handleSelect = (hour) => {
     setSelectedHour(hour);
-    onSelect({ hour }); // ✅ enviar objeto al padre
+    onSelect({ hour });
   };
 
   if (!professionalId || !selectedDate) return null;
@@ -67,12 +66,9 @@ export default function TimeSelect({ professionalId, selectedDate, onSelect }) {
             border: selectedHour === hour ? "2px solid #0070f3" : "1px solid #ccc",
             backgroundColor: selectedHour === hour ? "#e0f0ff" : "#fff",
             cursor: "pointer",
-            color: "black",
-            fontWeight: "500",
-            fontSize: "14px",
           }}
         >
-          {hour} {/* ✅ texto visible */}
+          {hour}
         </button>
       ))}
     </div>

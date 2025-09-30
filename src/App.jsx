@@ -1,6 +1,6 @@
 // src/App.jsx
 import { useState } from "react";
-import { supabase } from "./lib/supabaseClient"; // ✅ importa supabase aquí
+import { supabase } from "./lib/supabaseClient";
 import ProfessionalSelect from "./components/ProfessionalSelect";
 import ServiceSelect from "./components/ServiceSelect";
 import TimeSelect from "./components/TimeSelect";
@@ -11,10 +11,17 @@ export default function App() {
   const [selectedService, setSelectedService] = useState(null);
   const [selectedDate, setSelectedDate] = useState("");
   const [selectedTime, setSelectedTime] = useState(null);
+  const [clientName, setClientName] = useState("");
+  const [clientEmail, setClientEmail] = useState("");
+  const [clientPhone, setClientPhone] = useState("");
   const [message, setMessage] = useState("");
 
   const handleConfirm = async () => {
     if (!selectedProfessional || !selectedService || !selectedDate || !selectedTime) return;
+    if (!clientName || !clientEmail || !clientPhone) {
+      setMessage("❌ Por favor completa todos los datos del cliente");
+      return;
+    }
 
     try {
       const { data, error } = await supabase
@@ -25,17 +32,23 @@ export default function App() {
             service_id: selectedService.id,
             date: selectedDate,
             time: selectedTime.hour,
+            client_name: clientName,
+            client_email: clientEmail,
+            client_phone: clientPhone
           },
         ]);
 
       if (error) throw error;
 
       setMessage("✅ Cita confirmada con éxito");
-      // Resetear selección si quieres
+      // Opcional: resetear todos los campos
       // setSelectedProfessional(null);
       // setSelectedService(null);
       // setSelectedDate("");
       // setSelectedTime(null);
+      // setClientName("");
+      // setClientEmail("");
+      // setClientPhone("");
     } catch (err) {
       setMessage("❌ Error al confirmar cita: " + err.message);
     }
@@ -83,6 +96,40 @@ export default function App() {
             selectedDate={selectedDate}
             onSelect={setSelectedTime}
           />
+        </div>
+      )}
+
+      {/* Formulario de cliente */}
+      {selectedTime && (
+        <div style={{ marginBottom: "16px" }}>
+          <h3>Datos del cliente</h3>
+          <div style={{ marginBottom: "8px" }}>
+            <input
+              type="text"
+              placeholder="Nombre completo"
+              value={clientName}
+              onChange={(e) => setClientName(e.target.value)}
+              style={{ width: "100%", padding: "8px", borderRadius: "6px", border: "1px solid #ccc" }}
+            />
+          </div>
+          <div style={{ marginBottom: "8px" }}>
+            <input
+              type="email"
+              placeholder="Email"
+              value={clientEmail}
+              onChange={(e) => setClientEmail(e.target.value)}
+              style={{ width: "100%", padding: "8px", borderRadius: "6px", border: "1px solid #ccc" }}
+            />
+          </div>
+          <div style={{ marginBottom: "8px" }}>
+            <input
+              type="tel"
+              placeholder="Teléfono"
+              value={clientPhone}
+              onChange={(e) => setClientPhone(e.target.value)}
+              style={{ width: "100%", padding: "8px", borderRadius: "6px", border: "1px solid #ccc" }}
+            />
+          </div>
         </div>
       )}
 

@@ -23,17 +23,13 @@ export default function TimeSelect({ professionalId, selectedDate, onSelect }) {
         const { data, error } = await supabase
           .from("appointments")
           .select("time")
-          .eq("professional_id", professionalId.id) // ✅ professionalId es objeto {id, name}
+          .eq("professional_id", professionalId.id)
           .eq("date", selectedDate);
 
         if (error) throw error;
 
         const bookedHours = data.map((appt) => appt.time);
-
-        // Generar todas las horas de 10:00 a 18:00
         const allHours = generateAvailableHours("10:00", "18:00", 60);
-
-        // Filtrar las horas ocupadas
         const freeHours = allHours.filter((hour) => !bookedHours.includes(hour));
 
         setAvailableHours(freeHours);
@@ -51,7 +47,7 @@ export default function TimeSelect({ professionalId, selectedDate, onSelect }) {
 
   const handleSelect = (hour) => {
     setSelectedHour(hour);
-    onSelect({ hour }); // ✅ enviamos objeto al padre, pero no lo usamos como value en JSX
+    onSelect({ hour }); // ✅ enviar objeto al padre
   };
 
   if (!professionalId || !selectedDate) return null;
@@ -61,7 +57,7 @@ export default function TimeSelect({ professionalId, selectedDate, onSelect }) {
 
   return (
     <div style={{ display: "flex", flexWrap: "wrap", gap: "8px", marginTop: "8px" }}>
-      {availableHours.map((hour) => (
+      {availableHours.map(hour => (
         <button
           key={hour}
           onClick={() => handleSelect(hour)}
@@ -76,7 +72,7 @@ export default function TimeSelect({ professionalId, selectedDate, onSelect }) {
             fontSize: "14px",
           }}
         >
-          {hour} {/* ✅ Texto visible */}
+          {hour} {/* ✅ texto visible */}
         </button>
       ))}
     </div>

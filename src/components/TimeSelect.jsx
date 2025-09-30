@@ -1,35 +1,62 @@
 // src/components/TimeSelect.jsx
 import { useState, useEffect } from "react";
+import { supabase } from "../lib/supabaseClient";
 import { generateAvailableHours } from "../utils/hours";
 
-/**
- * Componente para mostrar y seleccionar horas disponibles
- * Props:
- * - serviceDuration: duración del servicio en minutos (opcional)
- * - bookedHours: array de horas ya reservadas, ej: ["10:00", "13:00"]
- * - onSelect: función que recibe la hora seleccionada
- */
-export default function TimeSelect({ serviceDuration, bookedHours = [], onSelect }) {
+export default function TimeSelect({ professionalId, selectedDate, onSelect }) {
   const [availableHours, setAvailableHours] = useState([]);
+  const [loading, setLoading] = useState(false);
+  const [errorMsg, setErrorMsg] = useState("");
   const [selectedHour, setSelectedHour] = useState("");
 
   useEffect(() => {
-    // Generar todas las horas entre 10:00 y 18:00, con bloqueos de 1 hora
-    const allHours = generateAvailableHours("10:00", "18:00", 60);
+    if (!professionalId || !selectedDate) {
+      setAvailableHours([]);
+      return;
+    }
 
-    // Filtrar las horas ocupadas
-    const freeHours = allHours.filter((hour) => !bookedHours.includes(hour));
-    setAvailableHours(freeHours);
+    const fetchBookedHours = async () => {
+      setLoading(true);
+      setErrorMsg("");
 
-    // Limpiar selección si cambian las horas disponibles
-    setSelectedHour("");
-  }, [bookedHours, serviceDuration]);
+      try {
+        const { data, error } = await supabase
+          .from("appointments")
+          .select("time")
+          .eq("professional_id", professionalId)
+          .eq("date", selectedDate);
+
+        if (error) throw error;
+
+        const bookedHours = data.map((appt) => appt.time);
+
+        // Generar todas las horas de 10:00 a 18:00
+        const allHours = generateAvailableHours("10:00", "18:00", 60);
+
+        // Filtrar las horas ocupadas
+        const freeHours = allHours.filter((hour) => !bookedHours.includes(hour));
+
+        setAvailableHours(freeHours);
+        setSelectedHour("");
+      } catch (err) {
+        setErrorMsg("Error al cargar horas: " + err.message);
+        setAvailableHours([]);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchBookedHours();
+  }, [professionalId, selectedDate]);
 
   const handleSelect = (hour) => {
     setSelectedHour(hour);
     onSelect(hour);
   };
 
+  if (!professionalId || !selectedDate) return null;
+  if (loading) return <p>Cargando horas...</p>;
+  if (errorMsg) return <p style={{ color: "red" }}>{errorMsg}</p>;
   if (availableHours.length === 0) return <p>No hay horas disponibles.</p>;
 
   return (

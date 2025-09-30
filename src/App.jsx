@@ -5,11 +5,10 @@ async function handleConfirm({
   clientName,
   clientEmail,
   clientPhone,
-  selectedProfessional,
-  selectedService,
+  selectedProfessional, // debe incluir: id, name, email
+  selectedService,      // debe incluir: id, name
   selectedDate,
-  selectedTime,
-  professionalEmail, // correo fijo del profesional
+  selectedTime,         // objeto { hour: "10:00" }
 }) {
   try {
     // 1️⃣ Guardar la cita en Supabase
@@ -48,7 +47,7 @@ async function handleConfirm({
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
-        clientEmail: professionalEmail,
+        clientEmail: selectedProfessional.email, // correo del profesional
         clientName,
         professionalName: selectedProfessional.name,
         serviceName: selectedService.name,
@@ -57,9 +56,10 @@ async function handleConfirm({
       }),
     });
 
-    alert("Cita confirmada y emails enviados correctamente!");
+    alert("✅ Cita confirmada y emails enviados correctamente!");
   } catch (err) {
-    console.error("Error al confirmar cita:", err);
+    console.error("❌ Error al confirmar cita:", err);
     alert("❌ Error al confirmar cita: " + err.message);
   }
 }
+

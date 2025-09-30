@@ -39,4 +39,10 @@ export default function ServiceSelect({ professionalId, onSelect }) {
     <select onChange={e => onSelect(e.target.value)}>
       <option value="">-- Selecciona servicio --</option>
       {services.map(s => (
-        <option key={s.id} value={s.name
+        <option key={s.id} value={s.name}>
+          {s.name} - ${s.price} CLP ({s.duration_minutes} min)
+        </option>
+      ))}
+    </select>
+  );
+}

@@ -1,5 +1,4 @@
-// src/components/ProfessionalSelect.jsx
-import { useState, useEffect } from "react";
+import { useEffect, useState } from "react";
 import { supabase } from "../lib/supabaseClient";
 
 export default function ProfessionalSelect({ onSelect }) {
@@ -11,29 +10,29 @@ export default function ProfessionalSelect({ onSelect }) {
     const fetchProfessionals = async () => {
       const { data, error } = await supabase
         .from("professionals")
-        .select("id, name")
+        .select("id, name, email")
         .order("name");
 
-      if (error) setErrorMsg(error.message);
-      else setProfessionals(data);
-
+      if (error) {
+        console.error("Error cargando profesionales:", error.message);
+        setErrorMsg(error.message);
+      } else {
+        setProfessionals(data);
+      }
       setLoading(false);
     };
-
     fetchProfessionals();
   }, []);
 
   if (loading) return <p>Cargando profesionales...</p>;
-  if (errorMsg) return <p style={{ color: "red" }}>{errorMsg}</p>;
+  if (errorMsg) return <p style={{ color: "red" }}>Error: {errorMsg}</p>;
   if (professionals.length === 0) return <p>No hay profesionales registrados.</p>;
 
   return (
-    <select
-      onChange={(e) => {
-        const selected = professionals.find((p) => p.id === e.target.value);
-        onSelect(selected || null);
-      }}
-    >
+    <select onChange={(e) => {
+      const prof = professionals.find(p => p.id === e.target.value);
+      onSelect(prof);
+    }}>
       <option value="">-- Selecciona profesional --</option>
       {professionals.map((p) => (
         <option key={p.id} value={p.id}>{p.name}</option>

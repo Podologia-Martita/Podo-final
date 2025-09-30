@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { supabase } from "../lib/supabaseClient";
 import ProfessionalSelect from "./ProfessionalSelect";
 import ServiceSelect from "./ServiceSelect";
+import { FaClock } from "react-icons/fa"; // ícono de reloj
 
 export default function VisualAppointmentForm() {
   const [selectedProfessional, setSelectedProfessional] = useState("");
@@ -84,8 +85,18 @@ export default function VisualAppointmentForm() {
   };
 
   return (
-    <div style={{ maxWidth: "500px", margin: "0 auto", padding: "16px", fontFamily: "Arial, sans-serif" }}>
-      <h1 style={{ textAlign: "center", marginBottom: "20px" }}>Reserva tu cita - Podología Marta</h1>
+    <div style={{
+      maxWidth: "520px",
+      margin: "20px auto",
+      padding: "20px",
+      borderRadius: "12px",
+      background: "#ffffff",
+      boxShadow: "0 6px 18px rgba(0,0,0,0.1)",
+      fontFamily: "Arial, sans-serif"
+    }}>
+      <h1 style={{ textAlign: "center", marginBottom: "24px", color: "#007bff" }}>
+        Reserva tu cita
+      </h1>
 
       <div style={{ marginBottom: "16px" }}>
         <label style={{ fontWeight: "bold" }}>Profesional:</label>
@@ -131,20 +142,24 @@ export default function VisualAppointmentForm() {
                   onClick={() => setSelectedTime(h)}
                   style={{
                     flex: "1 1 30%",
-                    padding: "12px 0",
+                    padding: "12px",
                     borderRadius: "10px",
                     border: selectedTime === h ? "2px solid #007bff" : "1px solid #ccc",
-                    backgroundColor: isBooked ? "#f8d7da" : "#e0f7fa",
-                    color: isBooked ? "#721c24" : "#006064",
+                    background: isBooked ? "#f8d7da" : "linear-gradient(135deg, #00c6ff, #0072ff)",
+                    color: isBooked ? "#721c24" : "#fff",
                     cursor: isBooked ? "not-allowed" : "pointer",
-                    textAlign: "center",
                     fontWeight: selectedTime === h ? "bold" : "normal",
-                    transition: "all 0.2s",
-                    boxShadow: selectedTime === h ? "0 4px 8px rgba(0,0,0,0.2)" : "none"
+                    boxShadow: selectedTime === h ? "0 4px 10px rgba(0,0,0,0.2)" : "0 2px 6px rgba(0,0,0,0.1)",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    gap: "6px",
+                    transition: "all 0.2s"
                   }}
-                  onMouseOver={e => !isBooked && (e.currentTarget.style.backgroundColor = "#b2ebf2")}
-                  onMouseOut={e => !isBooked && (e.currentTarget.style.backgroundColor = "#e0f7fa")}
+                  onMouseOver={e => !isBooked && (e.currentTarget.style.transform = "scale(1.05)")}
+                  onMouseOut={e => !isBooked && (e.currentTarget.style.transform = "scale(1)")}
                 >
+                  <FaClock />
                   {h}
                 </button>
               );
@@ -163,7 +178,7 @@ export default function VisualAppointmentForm() {
             onChange={e => setClientName(e.target.value)}
             style={{
               width: "100%",
-              padding: "10px",
+              padding: "12px",
               borderRadius: "8px",
               border: "1px solid #ccc",
               fontSize: "16px"
@@ -178,16 +193,16 @@ export default function VisualAppointmentForm() {
           width: "100%",
           padding: "14px",
           borderRadius: "10px",
-          backgroundColor: "#007bff",
+          background: "linear-gradient(135deg, #00c6ff, #0072ff)",
           color: "white",
           border: "none",
           fontWeight: "bold",
           fontSize: "16px",
           cursor: "pointer",
-          transition: "background-color 0.2s, transform 0.1s"
+          transition: "all 0.2s",
         }}
-        onMouseOver={e => e.currentTarget.style.backgroundColor = "#0056b3"}
-        onMouseOut={e => e.currentTarget.style.backgroundColor = "#007bff"}
+        onMouseOver={e => e.currentTarget.style.transform = "scale(1.02)"}
+        onMouseOut={e => e.currentTarget.style.transform = "scale(1)"}
         onMouseDown={e => e.currentTarget.style.transform = "scale(0.98)"}
         onMouseUp={e => e.currentTarget.style.transform = "scale(1)"}
       >

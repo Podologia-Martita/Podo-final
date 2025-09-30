@@ -23,7 +23,7 @@ export default function TimeSelect({ professionalId, selectedDate, onSelect }) {
         const { data, error } = await supabase
           .from("appointments")
           .select("time")
-          .eq("professional_id", professionalId.id)
+          .eq("professional_id", professionalId.id) // ✅ professionalId es objeto {id, name}
           .eq("date", selectedDate);
 
         if (error) throw error;
@@ -51,7 +51,7 @@ export default function TimeSelect({ professionalId, selectedDate, onSelect }) {
 
   const handleSelect = (hour) => {
     setSelectedHour(hour);
-    onSelect({ hour }); // ✅ Aquí pasamos un objeto con la hora
+    onSelect({ hour }); // ✅ enviamos objeto al padre, pero no lo usamos como value en JSX
   };
 
   if (!professionalId || !selectedDate) return null;

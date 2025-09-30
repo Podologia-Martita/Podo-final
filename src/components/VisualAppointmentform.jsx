@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { supabase } from "../lib/supabaseClient";
 import ProfessionalSelect from "./ProfessionalSelect";
 import ServiceSelect from "./ServiceSelect";
-import { FaClock } from "react-icons/fa";
+import { FaClock } from "react-icons/fa"; // ícono de reloj
 
 export default function VisualAppointmentForm() {
   const [selectedProfessional, setSelectedProfessional] = useState("");
@@ -13,7 +13,6 @@ export default function VisualAppointmentForm() {
   const [hours, setHours] = useState([]);
   const [bookedHours, setBookedHours] = useState([]);
 
-  // Genera horas de 10 a 18
   const generateHours = () => {
     const arr = [];
     for (let h = 10; h <= 18; h++) {
@@ -22,9 +21,8 @@ export default function VisualAppointmentForm() {
     return arr;
   };
 
-  // Carga horas ocupadas
   useEffect(() => {
-    const fetchAppointments = async () => {
+    const fetchBookedHours = async () => {
       if (!selectedProfessional || !selectedDate) {
         setHours([]);
         setBookedHours([]);
@@ -32,7 +30,7 @@ export default function VisualAppointmentForm() {
       }
 
       const { data, error } = await supabase
-        .from("bookings") // tu tabla real
+        .from("bookings")
         .select("time")
         .eq("professional_id", selectedProfessional)
         .eq("date", selectedDate);
@@ -53,10 +51,9 @@ export default function VisualAppointmentForm() {
       setBookedHours(booked);
     };
 
-    fetchAppointments();
+    fetchBookedHours();
   }, [selectedProfessional, selectedDate]);
 
-  // Reserva cita
   const handleBooking = async () => {
     if (!selectedProfessional || !selectedService || !selectedDate || !selectedTime || !clientName) {
       alert("Completa todos los campos");
@@ -66,7 +63,7 @@ export default function VisualAppointmentForm() {
     const { error } = await supabase.from("bookings").insert([
       {
         professional_id: selectedProfessional,
-        service_id: selectedService,
+        service: selectedService,
         date: selectedDate,
         time: `${selectedDate} ${selectedTime}:00`,
         client_name: clientName

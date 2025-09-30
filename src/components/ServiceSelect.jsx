@@ -1,4 +1,5 @@
-iimport { useEffect, useState } from "react";
+// src/components/ServiceSelect.jsx
+import { useEffect, useState } from "react";
 import { supabase } from "../lib/supabaseClient";
 
 export default function ServiceSelect({ professionalId, onSelect }) {

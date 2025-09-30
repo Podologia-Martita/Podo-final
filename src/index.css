@@ -1,0 +1,9 @@
+body { font-family: Arial, sans-serif; margin:0; background:#f7f7f7; color:#111; }
+.container { max-width:900px; margin:24px auto; padding:16px; background:white; border-radius:8px; }
+.header { display:flex; justify-content:space-between; align-items:center; margin-bottom:16px; }
+button { padding:8px 12px; border-radius:6px; border:none; background:#1976d2; color:white; cursor:pointer; }
+input, select { padding:8px; border:1px solid #ccc; border-radius:6px; }
+.notice { margin-top:8px; color:green; font-size:14px; }
+table { width:100%; border-collapse:collapse; margin-top:12px; }
+th,td { border:1px solid #ddd; padding:8px; text-align:left; }
+th { background:#eee; }

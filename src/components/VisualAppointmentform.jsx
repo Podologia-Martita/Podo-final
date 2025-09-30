@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { supabase } from "../lib/supabaseClient";
 import ProfessionalSelect from "./ProfessionalSelect";
 import ServiceSelect from "./ServiceSelect";
-import { FaClock } from "react-icons/fa"; // ícono de reloj
+import { FaClock } from "react-icons/fa";
 
 export default function VisualAppointmentForm() {
   const [selectedProfessional, setSelectedProfessional] = useState("");
@@ -32,7 +32,7 @@ export default function VisualAppointmentForm() {
       }
 
       const { data, error } = await supabase
-        .from("bookings") // nombre de tu tabla de citas
+        .from("bookings") // tu tabla real
         .select("time")
         .eq("professional_id", selectedProfessional)
         .eq("date", selectedDate);

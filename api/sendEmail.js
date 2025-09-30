@@ -1,8 +1,7 @@
 import nodemailer from "nodemailer";
 
 export default async function handler(req, res) {
-  if (req.method !== "POST")
-    return res.status(405).json({ error: "Method not allowed" });
+  if (req.method !== "POST") return res.status(405).json({ error: "Method not allowed" });
 
   const { clientEmail, clientName, professionalName, serviceName, date, time } = req.body;
 
@@ -10,18 +9,23 @@ export default async function handler(req, res) {
     service: "gmail",
     auth: {
       user: process.env.GMAIL_USER,
-      pass: process.env.GMAIL_APP_PASS, // contraseña de app
+      pass: process.env.GMAIL_APP_PASS,
     },
   });
 
   const mailOptions = {
     from: process.env.GMAIL_USER,
     to: clientEmail,
-    subject: "Confirmación de cita - Podología Marta",
+    subject: "Confirmación de Cita - Podología Marta",
     html: `
       <p>Hola ${clientName},</p>
-      <p>Tu cita con <strong>${professionalName}</strong> para <strong>${serviceName}</strong>
-      el <strong>${date}</strong> a las <strong>${time}</strong> ha sido confirmada.</p>
+      <p>Se ha agendado una <strong>CITA</strong> en Podología Marta para:</p>
+      <ul>
+        <li>Profesional: ${professionalName}</li>
+        <li>Servicio: ${serviceName}</li>
+        <li>Fecha: ${date}</li>
+        <li>Hora: ${time}</li>
+      </ul>
       <p>¡Gracias!</p>
     `,
   };

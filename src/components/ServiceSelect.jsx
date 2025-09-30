@@ -1,4 +1,3 @@
-// src/components/ServiceSelect.jsx
 import { useEffect, useState } from 'react';
 import { supabase } from '../lib/supabaseClient';
 
@@ -18,7 +17,7 @@ export default function ServiceSelect({ professionalId, onSelect }) {
       const { data, error } = await supabase
         .from('services')
         .select('id, name, price, duration_minutes')
-        .eq('professional_id', professionalId.id)
+        .eq('professional_id', professionalId)
         .order('name');
 
       if (error) {
@@ -40,17 +39,13 @@ export default function ServiceSelect({ professionalId, onSelect }) {
   if (services.length === 0) return <p>No hay servicios disponibles.</p>;
 
   return (
-    <select
-      onChange={(e) => {
-        const selected = services.find((s) => s.id === e.target.value);
-        onSelect(selected || null);
-      }}
-    >
+    <select onChange={e => {
+      const serv = services.find(s => s.id === e.target.value);
+      onSelect(serv);
+    }}>
       <option value="">-- Selecciona servicio --</option>
       {services.map(s => (
-        <option key={s.id} value={s.id}>
-          {s.name} - ${s.price} CLP ({s.duration_minutes} min)
-        </option>
+        <option key={s.id} value={s.id}>{s.name} - ${s.price} CLP ({s.duration_minutes} min)</option>
       ))}
     </select>
   );

@@ -1,5 +1,6 @@
 // src/App.jsx
 import { useState } from "react";
+import { supabase } from "./lib/supabaseClient"; // ✅ importa supabase aquí
 import ProfessionalSelect from "./components/ProfessionalSelect";
 import ServiceSelect from "./components/ServiceSelect";
 import TimeSelect from "./components/TimeSelect";
@@ -10,6 +11,35 @@ export default function App() {
   const [selectedService, setSelectedService] = useState(null);
   const [selectedDate, setSelectedDate] = useState("");
   const [selectedTime, setSelectedTime] = useState(null);
+  const [message, setMessage] = useState("");
+
+  const handleConfirm = async () => {
+    if (!selectedProfessional || !selectedService || !selectedDate || !selectedTime) return;
+
+    try {
+      const { data, error } = await supabase
+        .from("appointments")
+        .insert([
+          {
+            professional_id: selectedProfessional.id,
+            service_id: selectedService.id,
+            date: selectedDate,
+            time: selectedTime.hour,
+          },
+        ]);
+
+      if (error) throw error;
+
+      setMessage("✅ Cita confirmada con éxito");
+      // Resetear selección si quieres
+      // setSelectedProfessional(null);
+      // setSelectedService(null);
+      // setSelectedDate("");
+      // setSelectedTime(null);
+    } catch (err) {
+      setMessage("❌ Error al confirmar cita: " + err.message);
+    }
+  };
 
   return (
     <div style={{ maxWidth: "500px", margin: "40px auto", fontFamily: "Arial, sans-serif" }}>
@@ -25,10 +55,7 @@ export default function App() {
       {selectedProfessional && (
         <div style={{ marginBottom: "16px" }}>
           <label><strong>Servicio:</strong></label>
-          <ServiceSelect
-            professionalId={selectedProfessional}
-            onSelect={setSelectedService}
-          />
+          <ServiceSelect professionalId={selectedProfessional} onSelect={setSelectedService} />
         </div>
       )}
 
@@ -41,7 +68,7 @@ export default function App() {
             value={selectedDate}
             onChange={(e) => {
               setSelectedDate(e.target.value);
-              setSelectedTime(null); // resetear hora si cambia fecha
+              setSelectedTime(null);
             }}
           />
         </div>
@@ -61,13 +88,32 @@ export default function App() {
 
       {/* Resumen de cita */}
       {selectedTime && (
-        <AppointmentSummary
-          professional={selectedProfessional}
-          service={selectedService}
-          date={selectedDate}
-          time={selectedTime}
-        />
+        <div style={{ marginBottom: "16px" }}>
+          <AppointmentSummary
+            professional={selectedProfessional}
+            service={selectedService}
+            date={selectedDate}
+            time={selectedTime}
+          />
+          <button
+            onClick={handleConfirm}
+            style={{
+              marginTop: "8px",
+              padding: "8px 16px",
+              borderRadius: "6px",
+              backgroundColor: "#0070f3",
+              color: "#fff",
+              border: "none",
+              cursor: "pointer",
+            }}
+          >
+            Confirmar cita
+          </button>
+        </div>
       )}
+
+      {/* Mensaje de éxito/error */}
+      {message && <p style={{ marginTop: "16px", color: message.startsWith("✅") ? "green" : "red" }}>{message}</p>}
     </div>
   );
 }

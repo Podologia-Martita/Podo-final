@@ -10,8 +10,8 @@ export default function ProfessionalSelect({ onSelect }) {
     const fetchProfessionals = async () => {
       const { data, error } = await supabase
         .from("professionals")
-        .select("id, name, email")
-        .order("name");
+        .select("id, name")
+        .order("name"); // sin schema()
 
       if (error) {
         console.error("Error cargando profesionales:", error.message);
@@ -21,6 +21,7 @@ export default function ProfessionalSelect({ onSelect }) {
       }
       setLoading(false);
     };
+
     fetchProfessionals();
   }, []);
 
@@ -29,13 +30,17 @@ export default function ProfessionalSelect({ onSelect }) {
   if (professionals.length === 0) return <p>No hay profesionales registrados.</p>;
 
   return (
-    <select onChange={(e) => {
-      const prof = professionals.find(p => p.id === e.target.value);
-      onSelect(prof);
-    }}>
+    <select
+      onChange={(e) => {
+        const selected = professionals.find((p) => p.id === e.target.value);
+        if (selected) onSelect(selected.id, selected.name); // ✅ solo id
+      }}
+    >
       <option value="">-- Selecciona profesional --</option>
       {professionals.map((p) => (
-        <option key={p.id} value={p.id}>{p.name}</option>
+        <option key={p.id} value={p.id}>
+          {p.name}
+        </option>
       ))}
     </select>
   );

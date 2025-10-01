@@ -26,7 +26,7 @@ export default function App() {
     }
 
     try {
-      // Insertar cita en Supabase
+      // Insertar cita en Supabase y devolver los datos insertados
       const { data, error } = await supabase
         .from("appointments")
         .insert([
@@ -39,7 +39,8 @@ export default function App() {
             client_email: clientEmail,
             client_phone: clientPhone,
           },
-        ]);
+        ])
+        .select(); // importante para recibir datos insertados
 
       if (error) throw error;
 
@@ -52,7 +53,7 @@ export default function App() {
             clientEmail,
             clientName,
             professionalName: selectedProfessional.name,
-            serviceName: selectedService.name,
+            serviceName: `${selectedService.name} - $${selectedService.price} CLP (${selectedService.duration} min)`,
             date: selectedDate,
             time: selectedTime,
           }),
@@ -63,14 +64,14 @@ export default function App() {
 
       setMessage("✅ Cita confirmada con éxito");
 
-      // Opcional: resetear todos los campos
-      // setSelectedProfessional(null);
-      // setSelectedService(null);
-      // setSelectedDate("");
-      // setSelectedTime(null);
-      // setClientName("");
-      // setClientEmail("");
-      // setClientPhone("");
+      // Reset opcional
+      setSelectedProfessional(null);
+      setSelectedService(null);
+      setSelectedDate("");
+      setSelectedTime(null);
+      setClientName("");
+      setClientEmail("");
+      setClientPhone("");
     } catch (err) {
       setMessage("❌ Error al confirmar cita: " + err.message);
     }
@@ -90,7 +91,10 @@ export default function App() {
       {selectedProfessional && (
         <div style={{ marginBottom: "16px" }}>
           <label><strong>Servicio:</strong></label>
-          <ServiceSelect professionalId={selectedProfessional} onSelect={setSelectedService} />
+          <ServiceSelect
+            professionalId={selectedProfessional}
+            onSelect={setSelectedService}
+          />
         </div>
       )}
 

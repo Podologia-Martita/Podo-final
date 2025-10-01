@@ -16,6 +16,12 @@ export default function App() {
   const [clientPhone, setClientPhone] = useState("");
   const [message, setMessage] = useState("");
 
+  // 🔹 Formateador de fecha a DD/MM/YYYY
+  const formatDate = (date) => {
+    if (!date) return "";
+    return new Date(date).toLocaleDateString("es-CL");
+  };
+
   const handleConfirm = async () => {
     if (!selectedProfessional || !selectedService || !selectedDate || !selectedTime) return;
     if (!clientName || !clientEmail || !clientPhone) {
@@ -24,17 +30,17 @@ export default function App() {
     }
 
     try {
-      const { error } = await supabase
+      const { data, error } = await supabase
         .from("appointments")
         .insert([
           {
-            professional_id: selectedProfessional.id, // ✅ id del profesional
-            service_id: selectedService.id,           // ✅ id del servicio
-            date: selectedDate,
-            time: selectedTime.hour,                  // ✅ hora correcta
+            professional_id: selectedProfessional.id,
+            service_id: selectedService.id,
+            date: selectedDate, // se guarda en formato YYYY-MM-DD
+            time: selectedTime.hour,
             client_name: clientName,
             client_email: clientEmail,
-            client_phone: clientPhone,
+            client_phone: clientPhone
           },
         ]);
 
@@ -60,7 +66,7 @@ export default function App() {
       {selectedProfessional && (
         <div style={{ marginBottom: "16px" }}>
           <label><strong>Servicio:</strong></label>
-          <ServiceSelect professionalId={selectedProfessional.id} onSelect={setSelectedService} />
+          <ServiceSelect professionalId={selectedProfessional} onSelect={setSelectedService} />
         </div>
       )}
 
@@ -76,6 +82,11 @@ export default function App() {
               setSelectedTime(null);
             }}
           />
+          {selectedDate && (
+            <p style={{ marginTop: "4px", color: "#333" }}>
+              Fecha seleccionada: <strong>{formatDate(selectedDate)}</strong>
+            </p>
+          )}
         </div>
       )}
 
@@ -84,7 +95,7 @@ export default function App() {
         <div style={{ marginBottom: "16px" }}>
           <label><strong>Hora:</strong></label>
           <TimeSelect
-            professionalId={selectedProfessional.id} // ✅ pasamos solo el id
+            professionalId={selectedProfessional}
             selectedDate={selectedDate}
             onSelect={setSelectedTime}
           />
@@ -95,27 +106,33 @@ export default function App() {
       {selectedTime && (
         <div style={{ marginBottom: "16px" }}>
           <h3>Datos del cliente</h3>
-          <input
-            type="text"
-            placeholder="Nombre completo"
-            value={clientName}
-            onChange={(e) => setClientName(e.target.value)}
-            style={{ width: "100%", padding: "8px", marginBottom: "8px", borderRadius: "6px", border: "1px solid #ccc" }}
-          />
-          <input
-            type="email"
-            placeholder="Email"
-            value={clientEmail}
-            onChange={(e) => setClientEmail(e.target.value)}
-            style={{ width: "100%", padding: "8px", marginBottom: "8px", borderRadius: "6px", border: "1px solid #ccc" }}
-          />
-          <input
-            type="tel"
-            placeholder="Teléfono"
-            value={clientPhone}
-            onChange={(e) => setClientPhone(e.target.value)}
-            style={{ width: "100%", padding: "8px", borderRadius: "6px", border: "1px solid #ccc" }}
-          />
+          <div style={{ marginBottom: "8px" }}>
+            <input
+              type="text"
+              placeholder="Nombre completo"
+              value={clientName}
+              onChange={(e) => setClientName(e.target.value)}
+              style={{ width: "100%", padding: "8px", borderRadius: "6px", border: "1px solid #ccc" }}
+            />
+          </div>
+          <div style={{ marginBottom: "8px" }}>
+            <input
+              type="email"
+              placeholder="Email"
+              value={clientEmail}
+              onChange={(e) => setClientEmail(e.target.value)}
+              style={{ width: "100%", padding: "8px", borderRadius: "6px", border: "1px solid #ccc" }}
+            />
+          </div>
+          <div style={{ marginBottom: "8px" }}>
+            <input
+              type="tel"
+              placeholder="Teléfono"
+              value={clientPhone}
+              onChange={(e) => setClientPhone(e.target.value)}
+              style={{ width: "100%", padding: "8px", borderRadius: "6px", border: "1px solid #ccc" }}
+            />
+          </div>
         </div>
       )}
 
@@ -125,7 +142,7 @@ export default function App() {
           <AppointmentSummary
             professional={selectedProfessional}
             service={selectedService}
-            date={selectedDate}
+            date={formatDate(selectedDate)} // 🔹 fecha ya formateada
             time={selectedTime}
           />
           <button

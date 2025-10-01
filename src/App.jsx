@@ -24,31 +24,23 @@ export default function App() {
     }
 
     try {
-      const { data, error } = await supabase
+      const { error } = await supabase
         .from("appointments")
         .insert([
           {
-            professional_id: selectedProfessional.id,
-            service_id: selectedService.id,
+            professional_id: selectedProfessional.id, // ✅ id del profesional
+            service_id: selectedService.id,           // ✅ id del servicio
             date: selectedDate,
-            time: selectedTime.hour,
+            time: selectedTime.hour,                  // ✅ hora correcta
             client_name: clientName,
             client_email: clientEmail,
-            client_phone: clientPhone
+            client_phone: clientPhone,
           },
         ]);
 
       if (error) throw error;
 
       setMessage("✅ Cita confirmada con éxito");
-      // Opcional: resetear todos los campos
-      // setSelectedProfessional(null);
-      // setSelectedService(null);
-      // setSelectedDate("");
-      // setSelectedTime(null);
-      // setClientName("");
-      // setClientEmail("");
-      // setClientPhone("");
     } catch (err) {
       setMessage("❌ Error al confirmar cita: " + err.message);
     }
@@ -68,7 +60,7 @@ export default function App() {
       {selectedProfessional && (
         <div style={{ marginBottom: "16px" }}>
           <label><strong>Servicio:</strong></label>
-          <ServiceSelect professionalId={selectedProfessional} onSelect={setSelectedService} />
+          <ServiceSelect professionalId={selectedProfessional.id} onSelect={setSelectedService} />
         </div>
       )}
 
@@ -92,7 +84,7 @@ export default function App() {
         <div style={{ marginBottom: "16px" }}>
           <label><strong>Hora:</strong></label>
           <TimeSelect
-            professionalId={selectedProfessional}
+            professionalId={selectedProfessional.id} // ✅ pasamos solo el id
             selectedDate={selectedDate}
             onSelect={setSelectedTime}
           />
@@ -103,33 +95,27 @@ export default function App() {
       {selectedTime && (
         <div style={{ marginBottom: "16px" }}>
           <h3>Datos del cliente</h3>
-          <div style={{ marginBottom: "8px" }}>
-            <input
-              type="text"
-              placeholder="Nombre completo"
-              value={clientName}
-              onChange={(e) => setClientName(e.target.value)}
-              style={{ width: "100%", padding: "8px", borderRadius: "6px", border: "1px solid #ccc" }}
-            />
-          </div>
-          <div style={{ marginBottom: "8px" }}>
-            <input
-              type="email"
-              placeholder="Email"
-              value={clientEmail}
-              onChange={(e) => setClientEmail(e.target.value)}
-              style={{ width: "100%", padding: "8px", borderRadius: "6px", border: "1px solid #ccc" }}
-            />
-          </div>
-          <div style={{ marginBottom: "8px" }}>
-            <input
-              type="tel"
-              placeholder="Teléfono"
-              value={clientPhone}
-              onChange={(e) => setClientPhone(e.target.value)}
-              style={{ width: "100%", padding: "8px", borderRadius: "6px", border: "1px solid #ccc" }}
-            />
-          </div>
+          <input
+            type="text"
+            placeholder="Nombre completo"
+            value={clientName}
+            onChange={(e) => setClientName(e.target.value)}
+            style={{ width: "100%", padding: "8px", marginBottom: "8px", borderRadius: "6px", border: "1px solid #ccc" }}
+          />
+          <input
+            type="email"
+            placeholder="Email"
+            value={clientEmail}
+            onChange={(e) => setClientEmail(e.target.value)}
+            style={{ width: "100%", padding: "8px", marginBottom: "8px", borderRadius: "6px", border: "1px solid #ccc" }}
+          />
+          <input
+            type="tel"
+            placeholder="Teléfono"
+            value={clientPhone}
+            onChange={(e) => setClientPhone(e.target.value)}
+            style={{ width: "100%", padding: "8px", borderRadius: "6px", border: "1px solid #ccc" }}
+          />
         </div>
       )}
 

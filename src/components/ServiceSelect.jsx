@@ -14,10 +14,12 @@ export default function ServiceSelect({ professionalId, onSelect }) {
 
     const fetchServices = async () => {
       setLoading(true);
+      setErrorMsg("");
+
       const { data, error } = await supabase
         .from("services")
         .select("id, name, price, duration_minutes")
-        .eq("professional_id", professionalId) // ✅ UUID correcto
+        .eq("professional_id", professionalId)
         .order("name");
 
       if (error) {
@@ -25,8 +27,8 @@ export default function ServiceSelect({ professionalId, onSelect }) {
         setServices([]);
       } else {
         setServices(data || []);
-        setErrorMsg("");
       }
+
       setLoading(false);
     };
 
@@ -39,12 +41,7 @@ export default function ServiceSelect({ professionalId, onSelect }) {
   if (services.length === 0) return <p>No hay servicios disponibles.</p>;
 
   return (
-    <select
-      onChange={(e) => {
-        const selected = services.find((s) => s.id === e.target.value);
-        if (selected) onSelect(selected.id, selected.name); // ✅ id y nombre
-      }}
-    >
+    <select onChange={(e) => onSelect(e.target.value)}>
       <option value="">-- Selecciona servicio --</option>
       {services.map((s) => (
         <option key={s.id} value={s.id}>

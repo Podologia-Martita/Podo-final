@@ -15,9 +15,11 @@ export default function App() {
   const [clientEmail, setClientEmail] = useState("");
   const [clientPhone, setClientPhone] = useState("");
   const [message, setMessage] = useState("");
+  const [refreshHours, setRefreshHours] = useState(0); // 🔹 estado para refrescar TimeSelect
 
   const handleConfirm = async () => {
-    if (!selectedProfessional || !selectedService || !selectedDate || !selectedTime) return;
+    if (!selectedProfessional || !selectedService || !selectedDate || !selectedTime)
+      return;
 
     if (!clientName || !clientEmail || !clientPhone) {
       setMessage("❌ Por favor completa todos los datos del cliente");
@@ -25,9 +27,6 @@ export default function App() {
     }
 
     try {
-      // Guardar la hora como string
-      const hourString = typeof selectedTime === "object" ? selectedTime.hour : selectedTime;
-
       // Insertar cita en Supabase
       const { data, error } = await supabase
         .from("appointments")
@@ -36,7 +35,7 @@ export default function App() {
             professional_id: selectedProfessional.id,
             service_id: selectedService.id,
             date: selectedDate,
-            time: hourString,
+            time: selectedTime,
             client_name: clientName,
             client_email: clientEmail,
             client_phone: clientPhone,
@@ -45,7 +44,10 @@ export default function App() {
 
       if (error) throw error;
 
-      // Enviar email de confirmación (manteniendo tu API)
+      // Refrescar horas para que la hora reservada desaparezca
+      setRefreshHours(prev => prev + 1);
+
+      // Enviar email al cliente
       try {
         await fetch("/api/sendEmail", {
           method: "POST",
@@ -56,7 +58,7 @@ export default function App() {
             professionalName: selectedProfessional.name,
             serviceName: selectedService.name,
             date: selectedDate,
-            time: hourString,
+            time: selectedTime,
           }),
         });
       } catch (err) {
@@ -64,15 +66,6 @@ export default function App() {
       }
 
       setMessage("✅ Cita confirmada con éxito");
-
-      // Resetear campos opcional
-      // setSelectedProfessional(null);
-      // setSelectedService(null);
-      // setSelectedDate("");
-      // setSelectedTime(null);
-      // setClientName("");
-      // setClientEmail("");
-      // setClientPhone("");
     } catch (err) {
       setMessage("❌ Error al confirmar cita: " + err.message);
     }
@@ -119,6 +112,7 @@ export default function App() {
             professionalId={selectedProfessional}
             selectedDate={selectedDate}
             onSelect={setSelectedTime}
+            refresh={refreshHours} // 🔹 pasamos el estado refresh
           />
         </div>
       )}
@@ -164,7 +158,7 @@ export default function App() {
             professional={selectedProfessional}
             service={selectedService}
             date={selectedDate}
-            time={typeof selectedTime === "object" ? selectedTime.hour : selectedTime}
+            time={selectedTime}
           />
           <button
             onClick={handleConfirm}

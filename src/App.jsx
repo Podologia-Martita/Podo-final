@@ -1,70 +1,40 @@
 import { useState } from "react";
 import ProfessionalSelect from "./components/ProfessionalSelect";
 import ServiceSelect from "./components/ServiceSelect";
-import TimeSelect from "./components/TimeSelect";
 
 export default function App() {
-  const [selectedProfessional, setSelectedProfessional] = useState("");
-  const [selectedService, setSelectedService] = useState("");
-  const [selectedDate, setSelectedDate] = useState("");
-  const [selectedHour, setSelectedHour] = useState("");
+  const [professionalId, setProfessionalId] = useState("");
+  const [professionalName, setProfessionalName] = useState("");
+  const [serviceId, setServiceId] = useState("");
+
+  const [services, setServices] = useState([]); // para encontrar nombre del servicio
 
   return (
-    <div style={{ padding: "16px", fontFamily: "Arial, sans-serif" }}>
-      <h1>Podología Marta</h1>
+    <div style={{ padding: "16px" }}>
+      <h1>Agendar cita</h1>
 
-      {/* Selección de profesional */}
-      <div style={{ marginBottom: "16px" }}>
-        <label><strong>Profesional:</strong></label>
-        <ProfessionalSelect onSelect={setSelectedProfessional} />
+      <label>Profesional:</label>
+      <ProfessionalSelect
+        onSelect={(id) => {
+          setProfessionalId(id);
+
+          // actualizar nombre del profesional
+          const selected = professionals.find((p) => p.id === id);
+          setProfessionalName(selected?.name || "");
+        }}
+      />
+
+      <label>Servicio:</label>
+      <ServiceSelect
+        professionalId={professionalId}
+        onSelect={(id) => setServiceId(id)}
+      />
+
+      <div style={{ marginTop: "16px" }}>
+        <h2>Resumen de cita</h2>
+        <p>Profesional: {professionalName || "—"}</p>
+        <p>Servicio: {serviceId || "—"}</p>
       </div>
-
-      {/* Selección de servicio */}
-      {selectedProfessional && (
-        <div style={{ marginBottom: "16px" }}>
-          <label><strong>Servicio:</strong></label>
-          <ServiceSelect
-            professionalId={selectedProfessional}
-            onSelect={setSelectedService}
-          />
-        </div>
-      )}
-
-      {/* Selección de fecha */}
-      {selectedProfessional && selectedService && (
-        <div style={{ marginBottom: "16px" }}>
-          <label><strong>Fecha:</strong></label>
-          <input
-            type="date"
-            value={selectedDate}
-            onChange={(e) => setSelectedDate(e.target.value)}
-            min={new Date().toISOString().split("T")[0]} // no permitir fechas pasadas
-          />
-        </div>
-      )}
-
-      {/* Selección de hora */}
-      {selectedProfessional && selectedService && selectedDate && (
-        <div style={{ marginBottom: "16px" }}>
-          <label><strong>Hora:</strong></label>
-          <TimeSelect
-            professionalId={selectedProfessional}
-            selectedDate={selectedDate}
-            onSelect={setSelectedHour}
-          />
-        </div>
-      )}
-
-      {/* Resumen de la cita seleccionada */}
-      {selectedProfessional && selectedService && selectedDate && selectedHour && (
-        <div style={{ marginTop: "24px", padding: "12px", border: "1px solid #ccc", borderRadius: "8px" }}>
-          <h2>Resumen de cita</h2>
-          <p><strong>Profesional:</strong> {selectedProfessional}</p>
-          <p><strong>Servicio:</strong> {selectedService}</p>
-          <p><strong>Fecha:</strong> {selectedDate}</p>
-          <p><strong>Hora:</strong> {selectedHour}</p>
-        </div>
-      )}
     </div>
   );
 }

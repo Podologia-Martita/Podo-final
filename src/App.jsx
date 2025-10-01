@@ -6,8 +6,10 @@ import TimeSelect from "./components/TimeSelect";
 import { supabase } from "./lib/supabaseClient";
 
 export default function App() {
-  const [selectedProfessional, setSelectedProfessional] = useState({ id: "", name: "" });
-  const [selectedService, setSelectedService] = useState({ id: "", name: "" });
+  const [selectedProfessional, setSelectedProfessional] = useState("");
+  const [selectedProfessionalName, setSelectedProfessionalName] = useState("");
+  const [selectedService, setSelectedService] = useState("");
+  const [selectedServiceName, setSelectedServiceName] = useState("");
   const [selectedDate, setSelectedDate] = useState("");
   const [selectedHour, setSelectedHour] = useState("");
 
@@ -18,8 +20,8 @@ export default function App() {
 
   const handleConfirm = async () => {
     if (
-      !selectedProfessional.id ||
-      !selectedService.id ||
+      !selectedProfessional ||
+      !selectedService ||
       !selectedDate ||
       !selectedHour ||
       !clientName ||
@@ -31,10 +33,10 @@ export default function App() {
     }
 
     try {
-      const { data, error } = await supabase.from("appointments").insert([
+      const { error } = await supabase.from("appointments").insert([
         {
-          professional_id: selectedProfessional.id,
-          service_id: selectedService.id,
+          professional_id: selectedProfessional,
+          service_id: selectedService,
           date: selectedDate,
           time: selectedHour,
           client_name: clientName,
@@ -46,9 +48,12 @@ export default function App() {
       if (error) throw error;
 
       alert("✅ Cita confirmada!");
-      // Opcional: limpiar formulario
-      setSelectedProfessional({ id: "", name: "" });
-      setSelectedService({ id: "", name: "" });
+
+      // Limpiar solo los campos de selección
+      setSelectedProfessional("");
+      setSelectedProfessionalName("");
+      setSelectedService("");
+      setSelectedServiceName("");
       setSelectedDate("");
       setSelectedHour("");
       setClientName("");
@@ -67,23 +72,29 @@ export default function App() {
       <div style={{ marginBottom: "16px" }}>
         <label><strong>Profesional:</strong></label>
         <ProfessionalSelect
-          onSelect={(prof) => setSelectedProfessional({ id: prof.id, name: prof.name })}
+          onSelect={(prof) => {
+            setSelectedProfessional(prof.id);
+            setSelectedProfessionalName(prof.name);
+          }}
         />
       </div>
 
       {/* Selección de servicio */}
-      {selectedProfessional.id && (
+      {selectedProfessional && (
         <div style={{ marginBottom: "16px" }}>
           <label><strong>Servicio:</strong></label>
           <ServiceSelect
-            professionalId={selectedProfessional.id}
-            onSelect={(srv) => setSelectedService({ id: srv.id, name: srv.name })}
+            professionalId={selectedProfessional}
+            onSelect={(srv) => {
+              setSelectedService(srv.id);
+              setSelectedServiceName(srv.name);
+            }}
           />
         </div>
       )}
 
       {/* Selección de fecha */}
-      {selectedProfessional.id && selectedService.id && (
+      {selectedProfessional && selectedService && (
         <div style={{ marginBottom: "16px" }}>
           <label><strong>Fecha:</strong></label>
           <input
@@ -96,11 +107,11 @@ export default function App() {
       )}
 
       {/* Selección de hora */}
-      {selectedProfessional.id && selectedService.id && selectedDate && (
+      {selectedProfessional && selectedService && selectedDate && (
         <div style={{ marginBottom: "16px" }}>
           <label><strong>Hora:</strong></label>
           <TimeSelect
-            professionalId={selectedProfessional.id}
+            professionalId={selectedProfessional}
             selectedDate={selectedDate}
             onSelect={setSelectedHour}
           />
@@ -108,7 +119,7 @@ export default function App() {
       )}
 
       {/* Datos del cliente */}
-      {selectedProfessional.id && selectedService.id && selectedDate && selectedHour && (
+      {selectedProfessional && selectedService && selectedDate && selectedHour && (
         <div style={{ marginBottom: "16px" }}>
           <h3>Datos del cliente</h3>
           <div>
@@ -139,7 +150,7 @@ export default function App() {
       )}
 
       {/* Resumen de la cita */}
-      {selectedProfessional.id && selectedService.id && selectedDate && selectedHour && (
+      {selectedProfessional && selectedService && selectedDate && selectedHour && (
         <div
           style={{
             marginTop: "24px",
@@ -149,8 +160,8 @@ export default function App() {
           }}
         >
           <h2>Resumen de cita</h2>
-          <p><strong>Profesional:</strong> {selectedProfessional.name}</p>
-          <p><strong>Servicio:</strong> {selectedService.name}</p>
+          <p><strong>Profesional:</strong> {selectedProfessionalName}</p>
+          <p><strong>Servicio:</strong> {selectedServiceName}</p>
           <p><strong>Fecha:</strong> {selectedDate}</p>
           <p><strong>Hora:</strong> {selectedHour}</p>
           <p><strong>Nombre del cliente:</strong> {clientName}</p>
@@ -160,9 +171,12 @@ export default function App() {
       )}
 
       {/* Botón de confirmación */}
-      {selectedProfessional.id && selectedService.id && selectedDate && selectedHour && (
+      {selectedProfessional && selectedService && selectedDate && selectedHour && (
         <div style={{ marginTop: "16px" }}>
-          <button onClick={handleConfirm} style={{ padding: "8px 16px", cursor: "pointer" }}>
+          <button
+            onClick={handleConfirm}
+            style={{ padding: "8px 16px", cursor: "pointer" }}
+          >
             Confirmar cita
           </button>
         </div>

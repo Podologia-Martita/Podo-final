@@ -1,48 +1,31 @@
-// ProfessionalSelect.jsx
-import { useEffect, useState } from "react";
-import { supabase } from "../lib/supabaseClient";
+import { useState } from "react";
+import ProfessionalSelect from "./components/ProfessionalSelect";
+import ServiceSelect from "./components/ServiceSelect";
 
-export default function ProfessionalSelect({ onSelect }) {
-  const [professionals, setProfessionals] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [errorMsg, setErrorMsg] = useState("");
-
-  useEffect(() => {
-    const fetchProfessionals = async () => {
-      const { data, error } = await supabase
-        .from("professionals")
-        .select("id, name")
-        .order("name");
-
-      if (error) {
-        console.error("Error cargando profesionales:", error.message);
-        setErrorMsg(error.message);
-      } else {
-        setProfessionals(data);
-      }
-      setLoading(false);
-    };
-
-    fetchProfessionals();
-  }, []);
-
-  if (loading) return <p>Cargando profesionales...</p>;
-  if (errorMsg) return <p style={{ color: "red" }}>Error: {errorMsg}</p>;
-  if (professionals.length === 0) return <p>No hay profesionales registrados.</p>;
+export default function App() {
+  const [professional, setProfessional] = useState(null); // objeto completo
+  const [serviceId, setServiceId] = useState("");
 
   return (
-    <select
-      onChange={(e) => {
-        const selected = professionals.find((p) => p.id === e.target.value);
-        if (selected) onSelect(selected); // 👈 enviamos objeto completo
-      }}
-    >
-      <option value="">-- Selecciona profesional --</option>
-      {professionals.map((p) => (
-        <option key={p.id} value={p.id}>
-          {p.name}
-        </option>
-      ))}
-    </select>
+    <div style={{ padding: "20px" }}>
+      <h1>Agendar cita</h1>
+
+      <label>Profesional:</label>
+      <ProfessionalSelect
+        onSelect={(selectedProfessional) => setProfessional(selectedProfessional)}
+      />
+
+      <label>Servicio:</label>
+      <ServiceSelect
+        professionalId={professional?.id || ""}
+        onSelect={(id) => setServiceId(id)}
+      />
+
+      <div style={{ marginTop: "16px" }}>
+        <h2>Resumen de cita</h2>
+        <p>Profesional: {professional?.name || "—"}</p>
+        <p>Servicio: {serviceId || "—"}</p>
+      </div>
+    </div>
   );
 }

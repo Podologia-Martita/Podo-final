@@ -1,5 +1,5 @@
-import { useEffect, useState } from 'react';
-import { supabase } from '../lib/supabaseClient';
+import { useEffect, useState } from "react";
+import { supabase } from "../lib/supabaseClient";
 
 export default function ServiceSelect({ professionalId, onSelect }) {
   const [services, setServices] = useState([]);
@@ -15,10 +15,10 @@ export default function ServiceSelect({ professionalId, onSelect }) {
     const fetchServices = async () => {
       setLoading(true);
       const { data, error } = await supabase
-        .from('services')
-        .select('id, name, price, duration_minutes')
-        .eq('professional_id', professionalId)
-        .order('name');
+        .from("services")
+        .select("id, name, price, duration_minutes")
+        .eq("professional_id", professionalId) // ✅ UUID correcto
+        .order("name");
 
       if (error) {
         setErrorMsg("Error al cargar servicios: " + error.message);
@@ -35,17 +35,21 @@ export default function ServiceSelect({ professionalId, onSelect }) {
 
   if (!professionalId) return null;
   if (loading) return <p>Cargando servicios...</p>;
-  if (errorMsg) return <p style={{ color: 'red' }}>{errorMsg}</p>;
+  if (errorMsg) return <p style={{ color: "red" }}>{errorMsg}</p>;
   if (services.length === 0) return <p>No hay servicios disponibles.</p>;
 
   return (
-    <select onChange={e => {
-      const serv = services.find(s => s.id === e.target.value);
-      onSelect(serv);
-    }}>
+    <select
+      onChange={(e) => {
+        const selected = services.find((s) => s.id === e.target.value);
+        if (selected) onSelect(selected.id, selected.name); // ✅ id y nombre
+      }}
+    >
       <option value="">-- Selecciona servicio --</option>
-      {services.map(s => (
-        <option key={s.id} value={s.id}>{s.name} - ${s.price} CLP ({s.duration_minutes} min)</option>
+      {services.map((s) => (
+        <option key={s.id} value={s.id}>
+          {s.name} - ${s.price} CLP ({s.duration_minutes} min)
+        </option>
       ))}
     </select>
   );

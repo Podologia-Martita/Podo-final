@@ -1,3 +1,4 @@
+// src/components/TimeSelect.jsx
 import { useState, useEffect } from "react";
 import { supabase } from "../lib/supabaseClient";
 import { generateAvailableHours } from "../utils/hours";
@@ -22,14 +23,18 @@ export default function TimeSelect({ professionalId, selectedDate, onSelect }) {
         const { data, error } = await supabase
           .from("appointments")
           .select("time")
-          .eq("professional_id", professionalId)
+          .eq("professional_id", professionalId.id) // ✅ professionalId es objeto {id, name}
           .eq("date", selectedDate);
 
         if (error) throw error;
 
-        const bookedHours = data.map(appt => appt.time);
+        const bookedHours = data.map((appt) => appt.time);
+
+        // Generar todas las horas de 10:00 a 18:00
         const allHours = generateAvailableHours("10:00", "18:00", 60);
-        const freeHours = allHours.filter(hour => !bookedHours.includes(hour));
+
+        // Filtrar las horas ocupadas
+        const freeHours = allHours.filter((hour) => !bookedHours.includes(hour));
 
         setAvailableHours(freeHours);
         setSelectedHour("");
@@ -46,7 +51,7 @@ export default function TimeSelect({ professionalId, selectedDate, onSelect }) {
 
   const handleSelect = (hour) => {
     setSelectedHour(hour);
-    onSelect({ hour });
+    onSelect({ hour }); // ✅ enviamos objeto al padre, pero no lo usamos como value en JSX
   };
 
   if (!professionalId || !selectedDate) return null;
@@ -56,7 +61,7 @@ export default function TimeSelect({ professionalId, selectedDate, onSelect }) {
 
   return (
     <div style={{ display: "flex", flexWrap: "wrap", gap: "8px", marginTop: "8px" }}>
-      {availableHours.map(hour => (
+      {availableHours.map((hour) => (
         <button
           key={hour}
           onClick={() => handleSelect(hour)}
@@ -66,9 +71,12 @@ export default function TimeSelect({ professionalId, selectedDate, onSelect }) {
             border: selectedHour === hour ? "2px solid #0070f3" : "1px solid #ccc",
             backgroundColor: selectedHour === hour ? "#e0f0ff" : "#fff",
             cursor: "pointer",
+            color: "black",
+            fontWeight: "500",
+            fontSize: "14px",
           }}
         >
-          {hour}
+          {hour} {/* ✅ Texto visible */}
         </button>
       ))}
     </div>

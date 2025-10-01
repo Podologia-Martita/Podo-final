@@ -16,37 +16,61 @@ export default function App() {
   const [clientPhone, setClientPhone] = useState("");
   const [message, setMessage] = useState("");
 
-  // 🔹 Formateador de fecha a DD/MM/YYYY
-  const formatDate = (date) => {
-    if (!date) return "";
-    return new Date(date).toLocaleDateString("es-CL");
-  };
-
   const handleConfirm = async () => {
-    if (!selectedProfessional || !selectedService || !selectedDate || !selectedTime) return;
+    if (!selectedProfessional || !selectedService || !selectedDate || !selectedTime)
+      return;
+
     if (!clientName || !clientEmail || !clientPhone) {
       setMessage("❌ Por favor completa todos los datos del cliente");
       return;
     }
 
     try {
+      // Insertar cita en Supabase
       const { data, error } = await supabase
         .from("appointments")
         .insert([
           {
             professional_id: selectedProfessional.id,
             service_id: selectedService.id,
-            date: selectedDate, // se guarda en formato YYYY-MM-DD
-            time: selectedTime.hour,
+            date: selectedDate,
+            time: selectedTime,
             client_name: clientName,
             client_email: clientEmail,
-            client_phone: clientPhone
+            client_phone: clientPhone,
           },
         ]);
 
       if (error) throw error;
 
+      // Enviar email al cliente
+      try {
+        await fetch("/api/sendEmail", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            clientEmail,
+            clientName,
+            professionalName: selectedProfessional.name,
+            serviceName: selectedService.name,
+            date: selectedDate,
+            time: selectedTime,
+          }),
+        });
+      } catch (err) {
+        console.error("Error enviando email:", err);
+      }
+
       setMessage("✅ Cita confirmada con éxito");
+
+      // Opcional: resetear todos los campos
+      // setSelectedProfessional(null);
+      // setSelectedService(null);
+      // setSelectedDate("");
+      // setSelectedTime(null);
+      // setClientName("");
+      // setClientEmail("");
+      // setClientPhone("");
     } catch (err) {
       setMessage("❌ Error al confirmar cita: " + err.message);
     }
@@ -82,11 +106,6 @@ export default function App() {
               setSelectedTime(null);
             }}
           />
-          {selectedDate && (
-            <p style={{ marginTop: "4px", color: "#333" }}>
-              Fecha seleccionada: <strong>{formatDate(selectedDate)}</strong>
-            </p>
-          )}
         </div>
       )}
 
@@ -142,7 +161,7 @@ export default function App() {
           <AppointmentSummary
             professional={selectedProfessional}
             service={selectedService}
-            date={formatDate(selectedDate)} // 🔹 fecha ya formateada
+            date={selectedDate}
             time={selectedTime}
           />
           <button

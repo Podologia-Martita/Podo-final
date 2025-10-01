@@ -4,7 +4,6 @@ import { supabase } from "./lib/supabaseClient";
 import ProfessionalSelect from "./components/ProfessionalSelect";
 import ServiceSelect from "./components/ServiceSelect";
 import TimeSelect from "./components/TimeSelect";
-import AppointmentSummary from "./components/AppointmentSummary";
 
 export default function App() {
   const [selectedProfessional, setSelectedProfessional] = useState(null);
@@ -16,6 +15,12 @@ export default function App() {
   const [clientPhone, setClientPhone] = useState("");
   const [message, setMessage] = useState("");
 
+  const formatDate = (dateStr) => {
+    if (!dateStr) return "";
+    const [year, month, day] = dateStr.split("-");
+    return `${day}/${month}/${year}`;
+  };
+
   const handleConfirm = async () => {
     if (!selectedProfessional || !selectedService || !selectedDate || !selectedTime)
       return;
@@ -26,7 +31,6 @@ export default function App() {
     }
 
     try {
-      // Insertar cita en Supabase
       const { data, error } = await supabase
         .from("appointments")
         .insert([
@@ -52,8 +56,8 @@ export default function App() {
             clientEmail,
             clientName,
             professionalName: selectedProfessional.name,
-            serviceName: selectedService.name,
-            date: selectedDate,
+            serviceName: `${selectedService.name} - $${selectedService.price} CLP (${selectedService.duration_minutes} min)`,
+            date: formatDate(selectedDate),
             time: selectedTime,
           }),
         });
@@ -63,14 +67,6 @@ export default function App() {
 
       setMessage("✅ Cita confirmada con éxito");
 
-      // Opcional: resetear todos los campos
-      // setSelectedProfessional(null);
-      // setSelectedService(null);
-      // setSelectedDate("");
-      // setSelectedTime(null);
-      // setClientName("");
-      // setClientEmail("");
-      // setClientPhone("");
     } catch (err) {
       setMessage("❌ Error al confirmar cita: " + err.message);
     }
@@ -158,12 +154,13 @@ export default function App() {
       {/* Resumen de cita */}
       {selectedTime && (
         <div style={{ marginBottom: "16px" }}>
-          <AppointmentSummary
-            professional={selectedProfessional}
-            service={selectedService}
-            date={selectedDate}
-            time={selectedTime}
-          />
+          <div style={{ padding: "12px", border: "1px solid #ccc", borderRadius: "8px" }}>
+            <h2>Resumen de cita</h2>
+            <p><strong>Profesional:</strong> {selectedProfessional.name}</p>
+            <p><strong>Servicio:</strong> {selectedService.name} - ${selectedService.price} CLP ({selectedService.duration_minutes} min)</p>
+            <p><strong>Fecha:</strong> {formatDate(selectedDate)}</p>
+            <p><strong>Hora:</strong> {selectedTime}</p>
+          </div>
           <button
             onClick={handleConfirm}
             style={{

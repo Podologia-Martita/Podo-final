@@ -1,65 +1,48 @@
-// App.jsx (o donde confirmas la cita)
-import { supabase } from "./lib/supabaseClient";
+// ProfessionalSelect.jsx
+import { useEffect, useState } from "react";
+import { supabase } from "../lib/supabaseClient";
 
-async function handleConfirm({
-  clientName,
-  clientEmail,
-  clientPhone,
-  selectedProfessional,
-  selectedService,
-  selectedDate,
-  selectedTime,
-  professionalEmail, // correo fijo del profesional
-}) {
-  try {
-    // 1️⃣ Guardar la cita en Supabase
-    const { data, error } = await supabase
-      .from("appointments")
-      .insert([
-        {
-          client_name: clientName,
-          client_email: clientEmail,
-          client_phone: clientPhone,
-          professional_id: selectedProfessional.id,
-          service_id: selectedService.id,
-          date: selectedDate,
-          time: selectedTime.hour,
-        },
-      ]);
+export default function ProfessionalSelect({ onSelect }) {
+  const [professionals, setProfessionals] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [errorMsg, setErrorMsg] = useState("");
 
-    if (error) throw error;
+  useEffect(() => {
+    const fetchProfessionals = async () => {
+      const { data, error } = await supabase
+        .from("professionals")
+        .select("id, name")
+        .order("name");
 
-    // 2️⃣ Enviar email al cliente
-    await fetch("/api/sendEmail", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        clientEmail,
-        clientName,
-        professionalName: selectedProfessional.name,
-        serviceName: selectedService.name,
-        date: selectedDate,
-        time: selectedTime.hour,
-      }),
-    });
+      if (error) {
+        console.error("Error cargando profesionales:", error.message);
+        setErrorMsg(error.message);
+      } else {
+        setProfessionals(data);
+      }
+      setLoading(false);
+    };
 
-    // 3️⃣ Enviar email al profesional
-    await fetch("/api/sendEmail", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        clientEmail: professionalEmail,
-        clientName,
-        professionalName: selectedProfessional.name,
-        serviceName: selectedService.name,
-        date: selectedDate,
-        time: selectedTime.hour,
-      }),
-    });
+    fetchProfessionals();
+  }, []);
 
-    alert("Cita confirmada y emails enviados correctamente!");
-  } catch (err) {
-    console.error("Error al confirmar cita:", err);
-    alert("❌ Error al confirmar cita: " + err.message);
-  }
+  if (loading) return <p>Cargando profesionales...</p>;
+  if (errorMsg) return <p style={{ color: "red" }}>Error: {errorMsg}</p>;
+  if (professionals.length === 0) return <p>No hay profesionales registrados.</p>;
+
+  return (
+    <select
+      onChange={(e) => {
+        const selected = professionals.find((p) => p.id === e.target.value);
+        if (selected) onSelect(selected); // 👈 enviamos objeto completo
+      }}
+    >
+      <option value="">-- Selecciona profesional --</option>
+      {professionals.map((p) => (
+        <option key={p.id} value={p.id}>
+          {p.name}
+        </option>
+      ))}
+    </select>
+  );
 }

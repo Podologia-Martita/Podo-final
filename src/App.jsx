@@ -18,7 +18,6 @@ export default function App() {
     <div style={{ padding: "20px", fontFamily: "sans-serif" }}>
       <h1>Podología Marta</h1>
 
-      {/* Selección de profesional */}
       <div style={{ marginTop: "10px" }}>
         <label>Profesional:</label>
         <ProfessionalSelect
@@ -29,7 +28,6 @@ export default function App() {
         />
       </div>
 
-      {/* Selección de servicio */}
       {professionalId && (
         <div style={{ marginTop: "10px" }}>
           <label>Servicio:</label>
@@ -43,7 +41,6 @@ export default function App() {
         </div>
       )}
 
-      {/* Selección de fecha */}
       {serviceId && (
         <div style={{ marginTop: "10px" }}>
           <label>Fecha:</label>
@@ -55,7 +52,6 @@ export default function App() {
         </div>
       )}
 
-      {/* Selección de hora */}
       {serviceId && selectedDate && (
         <div style={{ marginTop: "10px" }}>
           <label>Hora:</label>
@@ -67,7 +63,6 @@ export default function App() {
         </div>
       )}
 
-      {/* Datos del cliente */}
       {selectedTime && (
         <div style={{ marginTop: "10px" }}>
           <label>Nombre:</label>
@@ -93,9 +88,14 @@ export default function App() {
         </div>
       )}
 
-      {/* Resumen de cita */}
       {selectedTime && clientName && clientEmail && clientPhone && (
-        <div style={{ marginTop: "20px", padding: "10px", border: "1px solid #ccc" }}>
+        <div
+          style={{
+            marginTop: "20px",
+            padding: "10px",
+            border: "1px solid #ccc",
+          }}
+        >
           <h3>Resumen de cita</h3>
           <p>
             <strong>Profesional:</strong> {professionalName}
@@ -110,7 +110,8 @@ export default function App() {
             <strong>Hora:</strong> {selectedTime}
           </p>
           <p>
-            <strong>Cliente:</strong> {clientName} | {clientEmail} | {clientPhone}
+            <strong>Cliente:</strong> {clientName} | {clientEmail} |{" "}
+            {clientPhone}
           </p>
         </div>
       )}

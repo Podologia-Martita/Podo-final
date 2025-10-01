@@ -1,3 +1,4 @@
+// src/components/ProfessionalSelect.jsx
 import { useEffect, useState } from "react";
 import { supabase } from "../lib/supabaseClient";
 
@@ -17,7 +18,7 @@ export default function ProfessionalSelect({ onSelect }) {
         console.error("Error cargando profesionales:", error.message);
         setErrorMsg(error.message);
       } else {
-        setProfessionals(data);
+        setProfessionals(data || []);
       }
       setLoading(false);
     };
@@ -30,7 +31,13 @@ export default function ProfessionalSelect({ onSelect }) {
   if (professionals.length === 0) return <p>No hay profesionales registrados.</p>;
 
   return (
-    <select onChange={(e) => onSelect(e.target.value)}>
+    <select
+      onChange={(e) => {
+        const sel = professionals.find((p) => p.id === e.target.value);
+        if (sel) onSelect(sel); // devuelvo objeto completo {id, name}
+      }}
+      defaultValue=""
+    >
       <option value="">-- Selecciona profesional --</option>
       {professionals.map((p) => (
         <option key={p.id} value={p.id}>

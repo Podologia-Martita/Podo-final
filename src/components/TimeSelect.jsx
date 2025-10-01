@@ -23,7 +23,7 @@ export default function TimeSelect({ professionalId, selectedDate, onSelect }) {
         const { data, error } = await supabase
           .from("appointments")
           .select("time")
-          .eq("professional_id", professionalId.id) // ✅ professionalId es objeto {id, name}
+          .eq("professional_id", professionalId)
           .eq("date", selectedDate);
 
         if (error) throw error;
@@ -51,7 +51,7 @@ export default function TimeSelect({ professionalId, selectedDate, onSelect }) {
 
   const handleSelect = (hour) => {
     setSelectedHour(hour);
-    onSelect({ hour }); // ✅ enviamos objeto al padre, pero no lo usamos como value en JSX
+    onSelect(hour);
   };
 
   if (!professionalId || !selectedDate) return null;
@@ -71,12 +71,12 @@ export default function TimeSelect({ professionalId, selectedDate, onSelect }) {
             border: selectedHour === hour ? "2px solid #0070f3" : "1px solid #ccc",
             backgroundColor: selectedHour === hour ? "#e0f0ff" : "#fff",
             cursor: "pointer",
-            color: "black",
-            fontWeight: "500",
-            fontSize: "14px",
+            color: "black",       // 👈 asegura que el texto se vea
+            fontWeight: "500",    // 👈 un poquito más marcado
+            fontSize: "14px"
           }}
         >
-          {hour} {/* ✅ Texto visible */}
+          {hour}
         </button>
       ))}
     </div>

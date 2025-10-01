@@ -1,23 +1,32 @@
-// ServiceSelect.jsx
 import { useEffect, useState } from "react";
 import { supabase } from "../lib/supabaseClient";
 
 export default function ServiceSelect({ professionalId, onSelect }) {
   const [services, setServices] = useState([]);
   const [loading, setLoading] = useState(false);
+  const [errorMsg, setErrorMsg] = useState("");
 
   useEffect(() => {
-    if (!professionalId) return;
+    if (!professionalId) {
+      setServices([]);
+      return;
+    }
 
     const fetchServices = async () => {
       setLoading(true);
       const { data, error } = await supabase
         .from("services")
         .select("id, name, price, duration_minutes")
-        .eq("professional_id", professionalId.id) // 👈 ahora usamos professionalId.id
+        .eq("professional_id", professionalId)
         .order("name");
 
-      if (!error) setServices(data || []);
+      if (error) {
+        setErrorMsg("Error al cargar servicios: " + error.message);
+        setServices([]);
+      } else {
+        setServices(data || []);
+        setErrorMsg("");
+      }
       setLoading(false);
     };
 
@@ -25,14 +34,12 @@ export default function ServiceSelect({ professionalId, onSelect }) {
   }, [professionalId]);
 
   if (!professionalId) return null;
+  if (loading) return <p>Cargando servicios...</p>;
+  if (errorMsg) return <p style={{ color: "red" }}>{errorMsg}</p>;
+  if (services.length === 0) return <p>No hay servicios disponibles.</p>;
 
   return (
-    <select
-      onChange={(e) => {
-        const selected = services.find((s) => s.id === e.target.value);
-        onSelect(selected ? { id: selected.id, name: selected.name } : null);
-      }}
-    >
+    <select onChange={(e) => onSelect(e.target.value)}>
       <option value="">-- Selecciona servicio --</option>
       {services.map((s) => (
         <option key={s.id} value={s.id}>

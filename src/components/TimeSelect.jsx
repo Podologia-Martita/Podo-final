@@ -1,3 +1,4 @@
+// src/components/TimeSelect.jsx
 import { useState, useEffect } from "react";
 import { supabase } from "../lib/supabaseClient";
 import { generateAvailableHours } from "../utils/hours";
@@ -8,19 +9,12 @@ export default function TimeSelect({ professionalId, selectedDate, onSelect }) {
   const [errorMsg, setErrorMsg] = useState("");
   const [selectedHour, setSelectedHour] = useState("");
 
-  const resolveProfessionalId = (p) => {
-    if (!p) return null;
-    return typeof p === "object" ? p.id : p;
-  };
-
   useEffect(() => {
-    const profId = resolveProfessionalId(professionalId);
-    if (!profId || !selectedDate) {
+    if (!professionalId || !selectedDate) {
       setAvailableHours([]);
       return;
     }
 
-    let mounted = true;
     const fetchBookedHours = async () => {
       setLoading(true);
       setErrorMsg("");
@@ -29,14 +23,20 @@ export default function TimeSelect({ professionalId, selectedDate, onSelect }) {
         const { data, error } = await supabase
           .from("appointments")
           .select("time")
-          .eq("professional_id", profId)
+          .eq("professional_id", professionalId)
           .eq("date", selectedDate);
 
-        if (!mounted) return;
         if (error) throw error;
 
-        const bookedHours = (data || []).map((appt) => appt.time);
+        // Convertir objetos {hour: "..."} a string directamente
+        const bookedHours = data.map((appt) =>
+          typeof appt.time === "object" ? appt.time.hour : appt.time
+        );
+
+        // Generar todas las horas de 10:00 a 18:00
         const allHours = generateAvailableHours("10:00", "18:00", 60);
+
+        // Filtrar las horas ocupadas
         const freeHours = allHours.filter((hour) => !bookedHours.includes(hour));
 
         setAvailableHours(freeHours);
@@ -45,17 +45,16 @@ export default function TimeSelect({ professionalId, selectedDate, onSelect }) {
         setErrorMsg("Error al cargar horas: " + err.message);
         setAvailableHours([]);
       } finally {
-        if (mounted) setLoading(false);
+        setLoading(false);
       }
     };
 
     fetchBookedHours();
-    return () => { mounted = false; };
   }, [professionalId, selectedDate]);
 
   const handleSelect = (hour) => {
     setSelectedHour(hour);
-    // DEVOLVEMOS un objeto { hour } porque App espera selectedTime.hour
+    // Enviar como objeto {hour: "..."} si quieres mantener compatibilidad con App
     onSelect({ hour });
   };
 
@@ -76,7 +75,7 @@ export default function TimeSelect({ professionalId, selectedDate, onSelect }) {
             border: selectedHour === hour ? "2px solid #0070f3" : "1px solid #ccc",
             backgroundColor: selectedHour === hour ? "#e0f0ff" : "#fff",
             cursor: "pointer",
-            color: "black",
+            color: "black", // color para que se vea bien
           }}
         >
           {hour}

@@ -11,7 +11,7 @@ export default function ProfessionalSelect({ onSelect }) {
       const { data, error } = await supabase
         .from("professionals")
         .select("id, name")
-        .order("name"); // sin schema()
+        .order("name");
 
       if (error) {
         console.error("Error cargando profesionales:", error.message);
@@ -33,7 +33,7 @@ export default function ProfessionalSelect({ onSelect }) {
     <select
       onChange={(e) => {
         const selected = professionals.find((p) => p.id === e.target.value);
-        if (selected) onSelect(selected.id, selected.name); // ✅ solo id
+        if (selected) onSelect(selected.id); // ✅ solo envía UUID
       }}
     >
       <option value="">-- Selecciona profesional --</option>

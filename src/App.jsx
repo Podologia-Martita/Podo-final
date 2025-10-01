@@ -13,11 +13,10 @@ export default function App() {
 
       <label>Profesional:</label>
       <ProfessionalSelect
-        onSelect={(id) => {
-          setProfessionalId(id);
-          // Actualizar nombre si es necesario
-          // Aquí puedes usar el array de profesionales o consultarlo
-          // para simplificar, puedes mantenerlo en otro estado global
+        onSelect={(selectedProfessional) => {
+          // selectedProfessional será un objeto { id, name }
+          setProfessionalId(selectedProfessional.id);
+          setProfessionalName(selectedProfessional.name);
         }}
       />
 

@@ -1,72 +1,81 @@
-import { useState } from "react";
-import ProfessionalSelect from "./components/ProfessionalSelect";
-import ServiceSelect from "./components/ServiceSelect";
-import TimeSelect from "./components/TimeSelect";
+// src/components/TimeSelect.jsx
+import { useState, useEffect } from "react";
+import { supabase } from "../lib/supabaseClient";
+import { generateAvailableHours } from "../utils/hours";
 
-export default function App() {
-  const [selectedProfessional, setSelectedProfessional] = useState(null); // guardaremos objeto {id, name}
-  const [selectedService, setSelectedService] = useState(null);           // guardaremos objeto {id, name}
-  const [selectedDate, setSelectedDate] = useState("");
+export default function TimeSelect({ professionalId, selectedDate, onSelect }) {
+  const [availableHours, setAvailableHours] = useState([]);
+  const [loading, setLoading] = useState(false);
+  const [errorMsg, setErrorMsg] = useState("");
   const [selectedHour, setSelectedHour] = useState("");
 
+  useEffect(() => {
+    if (!professionalId || !selectedDate) {
+      setAvailableHours([]);
+      return;
+    }
+
+    const fetchBookedHours = async () => {
+      setLoading(true);
+      setErrorMsg("");
+
+      try {
+        const { data, error } = await supabase
+          .from("appointments")
+          .select("time")
+          .eq("professional_id", professionalId)
+          .eq("date", selectedDate);
+
+        if (error) throw error;
+
+        const bookedHours = data.map((appt) => appt.time);
+
+        // Generar todas las horas de 10:00 a 18:00
+        const allHours = generateAvailableHours("10:00", "18:00", 60);
+
+        // Filtrar las horas ocupadas
+        const freeHours = allHours.filter((hour) => !bookedHours.includes(hour));
+
+        setAvailableHours(freeHours);
+        setSelectedHour("");
+      } catch (err) {
+        setErrorMsg("Error al cargar horas: " + err.message);
+        setAvailableHours([]);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchBookedHours();
+  }, [professionalId, selectedDate]);
+
+  const handleSelect = (hour) => {
+    setSelectedHour(hour);
+    onSelect(hour);
+  };
+
+  if (!professionalId || !selectedDate) return null;
+  if (loading) return <p>Cargando horas...</p>;
+  if (errorMsg) return <p style={{ color: "red" }}>{errorMsg}</p>;
+  if (availableHours.length === 0) return <p>No hay horas disponibles.</p>;
+
   return (
-    <div style={{ padding: "16px", fontFamily: "Arial, sans-serif" }}>
-      <h1>Podología Marta</h1>
-
-      {/* Selección de profesional */}
-      <div style={{ marginBottom: "16px" }}>
-        <label><strong>Profesional:</strong></label>
-        <ProfessionalSelect
-          onSelect={(prof) => setSelectedProfessional(prof)} // prof = {id, name}
-        />
-      </div>
-
-      {/* Selección de servicio */}
-      {selectedProfessional && (
-        <div style={{ marginBottom: "16px" }}>
-          <label><strong>Servicio:</strong></label>
-          <ServiceSelect
-            professionalId={selectedProfessional.id}
-            onSelect={(srv) => setSelectedService(srv)} // srv = {id, name}
-          />
-        </div>
-      )}
-
-      {/* Selección de fecha */}
-      {selectedProfessional && selectedService && (
-        <div style={{ marginBottom: "16px" }}>
-          <label><strong>Fecha:</strong></label>
-          <input
-            type="date"
-            value={selectedDate}
-            onChange={(e) => setSelectedDate(e.target.value)}
-            min={new Date().toISOString().split("T")[0]} // no permitir fechas pasadas
-          />
-        </div>
-      )}
-
-      {/* Selección de hora */}
-      {selectedProfessional && selectedService && selectedDate && (
-        <div style={{ marginBottom: "16px" }}>
-          <label><strong>Hora:</strong></label>
-          <TimeSelect
-            professionalId={selectedProfessional.id}
-            selectedDate={selectedDate}
-            onSelect={setSelectedHour}
-          />
-        </div>
-      )}
-
-      {/* Resumen de la cita seleccionada */}
-      {selectedProfessional && selectedService && selectedDate && selectedHour && (
-        <div style={{ marginTop: "24px", padding: "12px", border: "1px solid #ccc", borderRadius: "8px" }}>
-          <h2>Resumen de cita</h2>
-          <p><strong>Profesional:</strong> {selectedProfessional.name}</p>
-          <p><strong>Servicio:</strong> {selectedService.name}</p>
-          <p><strong>Fecha:</strong> {selectedDate}</p>
-          <p><strong>Hora:</strong> {selectedHour}</p>
-        </div>
-      )}
+    <div style={{ display: "flex", flexWrap: "wrap", gap: "8px", marginTop: "8px" }}>
+      {availableHours.map((hour) => (
+        <button
+          key={hour}
+          onClick={() => handleSelect(hour)}
+          style={{
+            padding: "6px 12px",
+            borderRadius: "6px",
+            border: selectedHour === hour ? "2px solid #0070f3" : "1px solid #ccc",
+            backgroundColor: selectedHour === hour ? "#e0f0ff" : "#fff",
+            cursor: "pointer",
+          }}
+        >
+          {hour}
+        </button>
+      ))}
     </div>
   );
 }

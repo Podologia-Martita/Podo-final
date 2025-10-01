@@ -15,6 +15,7 @@ export default function App() {
   const [clientEmail, setClientEmail] = useState("");
   const [clientPhone, setClientPhone] = useState("");
   const [message, setMessage] = useState("");
+  const [refreshHours, setRefreshHours] = useState(0); // 🔹 estado para refrescar TimeSelect
 
   const handleConfirm = async () => {
     if (!selectedProfessional || !selectedService || !selectedDate || !selectedTime)
@@ -26,7 +27,7 @@ export default function App() {
     }
 
     try {
-      // Insertar cita en Supabase y devolver los datos insertados
+      // Insertar cita en Supabase
       const { data, error } = await supabase
         .from("appointments")
         .insert([
@@ -39,10 +40,12 @@ export default function App() {
             client_email: clientEmail,
             client_phone: clientPhone,
           },
-        ])
-        .select(); // importante para recibir datos insertados
+        ]);
 
       if (error) throw error;
+
+      // Refrescar horas para que la hora reservada desaparezca
+      setRefreshHours(prev => prev + 1);
 
       // Enviar email al cliente
       try {
@@ -53,7 +56,7 @@ export default function App() {
             clientEmail,
             clientName,
             professionalName: selectedProfessional.name,
-            serviceName: `${selectedService.name} - $${selectedService.price} CLP (${selectedService.duration} min)`,
+            serviceName: selectedService.name,
             date: selectedDate,
             time: selectedTime,
           }),
@@ -63,15 +66,6 @@ export default function App() {
       }
 
       setMessage("✅ Cita confirmada con éxito");
-
-      // Reset opcional
-      setSelectedProfessional(null);
-      setSelectedService(null);
-      setSelectedDate("");
-      setSelectedTime(null);
-      setClientName("");
-      setClientEmail("");
-      setClientPhone("");
     } catch (err) {
       setMessage("❌ Error al confirmar cita: " + err.message);
     }
@@ -91,10 +85,7 @@ export default function App() {
       {selectedProfessional && (
         <div style={{ marginBottom: "16px" }}>
           <label><strong>Servicio:</strong></label>
-          <ServiceSelect
-            professionalId={selectedProfessional}
-            onSelect={setSelectedService}
-          />
+          <ServiceSelect professionalId={selectedProfessional} onSelect={setSelectedService} />
         </div>
       )}
 
@@ -121,6 +112,7 @@ export default function App() {
             professionalId={selectedProfessional}
             selectedDate={selectedDate}
             onSelect={setSelectedTime}
+            refresh={refreshHours} // 🔹 pasamos el estado refresh
           />
         </div>
       )}

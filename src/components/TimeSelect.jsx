@@ -1,4 +1,3 @@
-// src/components/TimeSelect.jsx
 import { useState, useEffect } from "react";
 import { supabase } from "../lib/supabaseClient";
 import { generateAvailableHours } from "../utils/hours";
@@ -36,11 +35,8 @@ export default function TimeSelect({ professionalId, selectedDate, onSelect }) {
         if (!mounted) return;
         if (error) throw error;
 
-        // Convertimos objetos {hour: "..."} a string para filtrar correctamente
-        const bookedHours = (data || []).map((appt) =>
-          typeof appt.time === "object" ? appt.time.hour : appt.time
-        );
-
+        // Extraemos solo la hora para comparar
+        const bookedHours = (data || []).map((appt) => appt.time.hour || appt.time);
         const allHours = generateAvailableHours("10:00", "18:00", 60);
         const freeHours = allHours.filter((hour) => !bookedHours.includes(hour));
 
@@ -60,7 +56,8 @@ export default function TimeSelect({ professionalId, selectedDate, onSelect }) {
 
   const handleSelect = (hour) => {
     setSelectedHour(hour);
-    onSelect({ hour }); // mantenemos el objeto {hour} para App.jsx
+    // DEVOLVEMOS un objeto { hour } porque App espera selectedTime.hour
+    onSelect({ hour });
   };
 
   if (!professionalId || !selectedDate) return null;

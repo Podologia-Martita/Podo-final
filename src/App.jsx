@@ -2,7 +2,6 @@ import React, { useState } from "react";
 import ProfessionalSelect from "./components/ProfessionalSelect";
 import ServiceSelect from "./components/ServiceSelect";
 import TimeSelect from "./components/TimeSelect";
-import Summary from "./components/Summary";
 
 export default function App() {
   const [professionalId, setProfessionalId] = useState("");
@@ -19,7 +18,8 @@ export default function App() {
     <div style={{ padding: "20px", fontFamily: "sans-serif" }}>
       <h1>Podología Marta</h1>
 
-      <div>
+      {/* Selección de profesional */}
+      <div style={{ marginTop: "10px" }}>
         <label>Profesional:</label>
         <ProfessionalSelect
           onSelect={(id, name) => {
@@ -29,6 +29,7 @@ export default function App() {
         />
       </div>
 
+      {/* Selección de servicio */}
       {professionalId && (
         <div style={{ marginTop: "10px" }}>
           <label>Servicio:</label>
@@ -42,6 +43,7 @@ export default function App() {
         </div>
       )}
 
+      {/* Selección de fecha */}
       {serviceId && (
         <div style={{ marginTop: "10px" }}>
           <label>Fecha:</label>
@@ -53,6 +55,7 @@ export default function App() {
         </div>
       )}
 
+      {/* Selección de hora */}
       {serviceId && selectedDate && (
         <div style={{ marginTop: "10px" }}>
           <label>Hora:</label>
@@ -64,6 +67,7 @@ export default function App() {
         </div>
       )}
 
+      {/* Datos del cliente */}
       {selectedTime && (
         <div style={{ marginTop: "10px" }}>
           <label>Nombre:</label>
@@ -72,12 +76,14 @@ export default function App() {
             value={clientName}
             onChange={(e) => setClientName(e.target.value)}
           />
+          <br />
           <label>Email:</label>
           <input
             type="email"
             value={clientEmail}
             onChange={(e) => setClientEmail(e.target.value)}
           />
+          <br />
           <label>Teléfono:</label>
           <input
             type="tel"
@@ -87,17 +93,25 @@ export default function App() {
         </div>
       )}
 
+      {/* Resumen de cita */}
       {selectedTime && clientName && clientEmail && clientPhone && (
-        <div style={{ marginTop: "20px" }}>
-          <Summary
-            professionalName={professionalName}
-            serviceName={serviceName}
-            date={selectedDate}
-            time={selectedTime}
-            clientName={clientName}
-            clientEmail={clientEmail}
-            clientPhone={clientPhone}
-          />
+        <div style={{ marginTop: "20px", padding: "10px", border: "1px solid #ccc" }}>
+          <h3>Resumen de cita</h3>
+          <p>
+            <strong>Profesional:</strong> {professionalName}
+          </p>
+          <p>
+            <strong>Servicio:</strong> {serviceName}
+          </p>
+          <p>
+            <strong>Fecha:</strong> {selectedDate}
+          </p>
+          <p>
+            <strong>Hora:</strong> {selectedTime}
+          </p>
+          <p>
+            <strong>Cliente:</strong> {clientName} | {clientEmail} | {clientPhone}
+          </p>
         </div>
       )}
     </div>

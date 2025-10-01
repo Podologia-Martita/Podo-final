@@ -4,6 +4,7 @@ import { supabase } from "./lib/supabaseClient";
 import ProfessionalSelect from "./components/ProfessionalSelect";
 import ServiceSelect from "./components/ServiceSelect";
 import TimeSelect from "./components/TimeSelect";
+import AppointmentSummary from "./components/AppointmentSummary";
 
 export default function App() {
   const [selectedProfessional, setSelectedProfessional] = useState(null);
@@ -51,7 +52,7 @@ export default function App() {
             clientEmail,
             clientName,
             professionalName: selectedProfessional.name,
-            serviceName: `${selectedService.name} - $${selectedService.price} CLP (${selectedService.duration_minutes} min)`,
+            serviceName: selectedService.name,
             date: selectedDate,
             time: selectedTime,
           }),
@@ -157,13 +158,12 @@ export default function App() {
       {/* Resumen de cita */}
       {selectedTime && (
         <div style={{ marginBottom: "16px" }}>
-          <div style={{ padding: "12px", border: "1px solid #ccc", borderRadius: "8px" }}>
-            <h2>Resumen de cita</h2>
-            <p><strong>Profesional:</strong> {selectedProfessional.name}</p>
-            <p><strong>Servicio:</strong> {selectedService.name} - ${selectedService.price} CLP ({selectedService.duration_minutes} min)</p>
-            <p><strong>Fecha:</strong> {selectedDate}</p>
-            <p><strong>Hora:</strong> {selectedTime}</p>
-          </div>
+          <AppointmentSummary
+            professional={selectedProfessional}
+            service={selectedService}
+            date={selectedDate}
+            time={selectedTime}
+          />
           <button
             onClick={handleConfirm}
             style={{

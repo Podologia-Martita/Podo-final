@@ -15,12 +15,6 @@ export default function App() {
   const [clientPhone, setClientPhone] = useState("");
   const [message, setMessage] = useState("");
 
-  const formatDate = (dateStr) => {
-    if (!dateStr) return "";
-    const [year, month, day] = dateStr.split("-");
-    return `${day}/${month}/${year}`;
-  };
-
   const handleConfirm = async () => {
     if (!selectedProfessional || !selectedService || !selectedDate || !selectedTime)
       return;
@@ -31,6 +25,7 @@ export default function App() {
     }
 
     try {
+      // Insertar cita en Supabase
       const { data, error } = await supabase
         .from("appointments")
         .insert([
@@ -57,7 +52,7 @@ export default function App() {
             clientName,
             professionalName: selectedProfessional.name,
             serviceName: `${selectedService.name} - $${selectedService.price} CLP (${selectedService.duration_minutes} min)`,
-            date: formatDate(selectedDate),
+            date: selectedDate,
             time: selectedTime,
           }),
         });
@@ -67,6 +62,14 @@ export default function App() {
 
       setMessage("✅ Cita confirmada con éxito");
 
+      // Opcional: resetear todos los campos
+      // setSelectedProfessional(null);
+      // setSelectedService(null);
+      // setSelectedDate("");
+      // setSelectedTime(null);
+      // setClientName("");
+      // setClientEmail("");
+      // setClientPhone("");
     } catch (err) {
       setMessage("❌ Error al confirmar cita: " + err.message);
     }
@@ -158,7 +161,7 @@ export default function App() {
             <h2>Resumen de cita</h2>
             <p><strong>Profesional:</strong> {selectedProfessional.name}</p>
             <p><strong>Servicio:</strong> {selectedService.name} - ${selectedService.price} CLP ({selectedService.duration_minutes} min)</p>
-            <p><strong>Fecha:</strong> {formatDate(selectedDate)}</p>
+            <p><strong>Fecha:</strong> {selectedDate}</p>
             <p><strong>Hora:</strong> {selectedTime}</p>
           </div>
           <button

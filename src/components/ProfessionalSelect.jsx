@@ -14,7 +14,6 @@ export default function ProfessionalSelect({ onSelect }) {
         .order("name");
 
       if (error) {
-        console.error("Error cargando profesionales:", error.message);
         setErrorMsg(error.message);
       } else {
         setProfessionals(data);
@@ -26,14 +25,14 @@ export default function ProfessionalSelect({ onSelect }) {
   }, []);
 
   if (loading) return <p>Cargando profesionales...</p>;
-  if (errorMsg) return <p style={{ color: "red" }}>Error: {errorMsg}</p>;
+  if (errorMsg) return <p style={{ color: "red" }}>{errorMsg}</p>;
   if (professionals.length === 0) return <p>No hay profesionales registrados.</p>;
 
   return (
     <select
       onChange={(e) => {
         const selected = professionals.find((p) => p.id === e.target.value);
-        if (selected) onSelect(selected.id); // ✅ solo envía UUID
+        if (selected) onSelect(selected); // enviar objeto completo
       }}
     >
       <option value="">-- Selecciona profesional --</option>

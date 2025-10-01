@@ -71,9 +71,6 @@ export default function TimeSelect({ professionalId, selectedDate, onSelect }) {
             border: selectedHour === hour ? "2px solid #0070f3" : "1px solid #ccc",
             backgroundColor: selectedHour === hour ? "#e0f0ff" : "#fff",
             cursor: "pointer",
-            color: "black",       // 👈 asegura que el texto se vea
-            fontWeight: "500",    // 👈 un poquito más marcado
-            fontSize: "14px"
           }}
         >
           {hour}

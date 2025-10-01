@@ -1,186 +1,166 @@
 // src/App.jsx
 import { useState } from "react";
+import { supabase } from "./lib/supabaseClient";
 import ProfessionalSelect from "./components/ProfessionalSelect";
 import ServiceSelect from "./components/ServiceSelect";
 import TimeSelect from "./components/TimeSelect";
-import { supabase } from "./lib/supabaseClient";
+import AppointmentSummary from "./components/AppointmentSummary";
 
 export default function App() {
-  const [selectedProfessional, setSelectedProfessional] = useState("");
-  const [selectedProfessionalName, setSelectedProfessionalName] = useState("");
-  const [selectedService, setSelectedService] = useState("");
-  const [selectedServiceName, setSelectedServiceName] = useState("");
+  const [selectedProfessional, setSelectedProfessional] = useState(null);
+  const [selectedService, setSelectedService] = useState(null);
   const [selectedDate, setSelectedDate] = useState("");
-  const [selectedHour, setSelectedHour] = useState("");
-
-  // Datos del cliente
+  const [selectedTime, setSelectedTime] = useState(null);
   const [clientName, setClientName] = useState("");
   const [clientEmail, setClientEmail] = useState("");
   const [clientPhone, setClientPhone] = useState("");
+  const [message, setMessage] = useState("");
 
   const handleConfirm = async () => {
-    if (
-      !selectedProfessional ||
-      !selectedService ||
-      !selectedDate ||
-      !selectedHour ||
-      !clientName ||
-      !clientEmail ||
-      !clientPhone
-    ) {
-      alert("❌ Por favor completa todos los campos");
+    if (!selectedProfessional || !selectedService || !selectedDate || !selectedTime) return;
+    if (!clientName || !clientEmail || !clientPhone) {
+      setMessage("❌ Por favor completa todos los datos del cliente");
       return;
     }
 
     try {
-      const { error } = await supabase.from("appointments").insert([
-        {
-          professional_id: selectedProfessional,
-          service_id: selectedService,
-          date: selectedDate,
-          time: selectedHour,
-          client_name: clientName,
-          client_email: clientEmail,
-          client_phone: clientPhone,
-        },
-      ]);
+      const { data, error } = await supabase
+        .from("appointments")
+        .insert([
+          {
+            professional_id: selectedProfessional.id,
+            service_id: selectedService.id,
+            date: selectedDate,
+            time: selectedTime.hour,
+            client_name: clientName,
+            client_email: clientEmail,
+            client_phone: clientPhone
+          },
+        ]);
 
       if (error) throw error;
 
-      alert("✅ Cita confirmada!");
-
-      // Limpiar solo los campos de selección
-      setSelectedProfessional("");
-      setSelectedProfessionalName("");
-      setSelectedService("");
-      setSelectedServiceName("");
-      setSelectedDate("");
-      setSelectedHour("");
-      setClientName("");
-      setClientEmail("");
-      setClientPhone("");
+      setMessage("✅ Cita confirmada con éxito");
+      // Opcional: resetear todos los campos
+      // setSelectedProfessional(null);
+      // setSelectedService(null);
+      // setSelectedDate("");
+      // setSelectedTime(null);
+      // setClientName("");
+      // setClientEmail("");
+      // setClientPhone("");
     } catch (err) {
-      alert("❌ Error al confirmar cita: " + err.message);
+      setMessage("❌ Error al confirmar cita: " + err.message);
     }
   };
 
   return (
-    <div style={{ padding: "16px", fontFamily: "Arial, sans-serif" }}>
-      <h1>Podología Marta</h1>
+    <div style={{ maxWidth: "500px", margin: "40px auto", fontFamily: "Arial, sans-serif" }}>
+      <h1>Reserva tu cita - Podología Marta</h1>
 
       {/* Selección de profesional */}
       <div style={{ marginBottom: "16px" }}>
         <label><strong>Profesional:</strong></label>
-        <ProfessionalSelect
-          onSelect={(prof) => {
-            setSelectedProfessional(prof.id);
-            setSelectedProfessionalName(prof.name);
-          }}
-        />
+        <ProfessionalSelect onSelect={setSelectedProfessional} />
       </div>
 
       {/* Selección de servicio */}
       {selectedProfessional && (
         <div style={{ marginBottom: "16px" }}>
           <label><strong>Servicio:</strong></label>
-          <ServiceSelect
-            professionalId={selectedProfessional}
-            onSelect={(srv) => {
-              setSelectedService(srv.id);
-              setSelectedServiceName(srv.name);
-            }}
-          />
+          <ServiceSelect professionalId={selectedProfessional} onSelect={setSelectedService} />
         </div>
       )}
 
       {/* Selección de fecha */}
-      {selectedProfessional && selectedService && (
+      {selectedService && (
         <div style={{ marginBottom: "16px" }}>
           <label><strong>Fecha:</strong></label>
           <input
             type="date"
             value={selectedDate}
-            onChange={(e) => setSelectedDate(e.target.value)}
-            min={new Date().toISOString().split("T")[0]}
+            onChange={(e) => {
+              setSelectedDate(e.target.value);
+              setSelectedTime(null);
+            }}
           />
         </div>
       )}
 
       {/* Selección de hora */}
-      {selectedProfessional && selectedService && selectedDate && (
+      {selectedDate && selectedService && selectedProfessional && (
         <div style={{ marginBottom: "16px" }}>
           <label><strong>Hora:</strong></label>
           <TimeSelect
             professionalId={selectedProfessional}
             selectedDate={selectedDate}
-            onSelect={setSelectedHour}
+            onSelect={setSelectedTime}
           />
         </div>
       )}
 
-      {/* Datos del cliente */}
-      {selectedProfessional && selectedService && selectedDate && selectedHour && (
+      {/* Formulario de cliente */}
+      {selectedTime && (
         <div style={{ marginBottom: "16px" }}>
           <h3>Datos del cliente</h3>
-          <div>
-            <label>Nombre:</label>
+          <div style={{ marginBottom: "8px" }}>
             <input
               type="text"
+              placeholder="Nombre completo"
               value={clientName}
               onChange={(e) => setClientName(e.target.value)}
+              style={{ width: "100%", padding: "8px", borderRadius: "6px", border: "1px solid #ccc" }}
             />
           </div>
-          <div>
-            <label>Email:</label>
+          <div style={{ marginBottom: "8px" }}>
             <input
               type="email"
+              placeholder="Email"
               value={clientEmail}
               onChange={(e) => setClientEmail(e.target.value)}
+              style={{ width: "100%", padding: "8px", borderRadius: "6px", border: "1px solid #ccc" }}
             />
           </div>
-          <div>
-            <label>Teléfono:</label>
+          <div style={{ marginBottom: "8px" }}>
             <input
               type="tel"
+              placeholder="Teléfono"
               value={clientPhone}
               onChange={(e) => setClientPhone(e.target.value)}
+              style={{ width: "100%", padding: "8px", borderRadius: "6px", border: "1px solid #ccc" }}
             />
           </div>
         </div>
       )}
 
-      {/* Resumen de la cita */}
-      {selectedProfessional && selectedService && selectedDate && selectedHour && (
-        <div
-          style={{
-            marginTop: "24px",
-            padding: "12px",
-            border: "1px solid #ccc",
-            borderRadius: "8px",
-          }}
-        >
-          <h2>Resumen de cita</h2>
-          <p><strong>Profesional:</strong> {selectedProfessionalName}</p>
-          <p><strong>Servicio:</strong> {selectedServiceName}</p>
-          <p><strong>Fecha:</strong> {selectedDate}</p>
-          <p><strong>Hora:</strong> {selectedHour}</p>
-          <p><strong>Nombre del cliente:</strong> {clientName}</p>
-          <p><strong>Email:</strong> {clientEmail}</p>
-          <p><strong>Teléfono:</strong> {clientPhone}</p>
-        </div>
-      )}
-
-      {/* Botón de confirmación */}
-      {selectedProfessional && selectedService && selectedDate && selectedHour && (
-        <div style={{ marginTop: "16px" }}>
+      {/* Resumen de cita */}
+      {selectedTime && (
+        <div style={{ marginBottom: "16px" }}>
+          <AppointmentSummary
+            professional={selectedProfessional}
+            service={selectedService}
+            date={selectedDate}
+            time={selectedTime}
+          />
           <button
             onClick={handleConfirm}
-            style={{ padding: "8px 16px", cursor: "pointer" }}
+            style={{
+              marginTop: "8px",
+              padding: "8px 16px",
+              borderRadius: "6px",
+              backgroundColor: "#0070f3",
+              color: "#fff",
+              border: "none",
+              cursor: "pointer",
+            }}
           >
             Confirmar cita
           </button>
         </div>
       )}
+
+      {/* Mensaje de éxito/error */}
+      {message && <p style={{ marginTop: "16px", color: message.startsWith("✅") ? "green" : "red" }}>{message}</p>}
     </div>
   );
 }
